@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using ModelContextProtocol.Server;
 using CWM.RoslynNavigator.Responses;
@@ -11,7 +13,7 @@ namespace CWM.RoslynNavigator.Tools;
 [McpServerToolType]
 public static class FindReferencesTool
 {
-    [McpServerTool(Name = "find_references"), Description("Find all usages of a symbol across the solution. Returns file, line, snippet, and reference kind.")]
+    [McpServerTool(Name = "find_references"), Description("Find all usages of a symbol across the solution. Returns file, line, snippet, and reference kind (usage, inheritance, invocation, instantiation, parameter, type-argument, assignment, implementation).")]
     public static async Task<string> ExecuteAsync(
         WorkspaceManager workspace,
         [Description("The symbol name to find references for")] string symbolName,
@@ -51,16 +53,57 @@ public static class FindReferencesTool
                     File: lineSpan.Path,
                     Line: lineSpan.StartLinePosition.Line + 1,
                     Snippet: snippet,
-                    Kind: GetReferenceKind(location)));
+                    Kind: ClassifyReferenceKind(location)));
             }
         }
 
         return JsonSerializer.Serialize(new ReferencesResult(results, results.Count));
     }
 
-    private static string GetReferenceKind(Microsoft.CodeAnalysis.FindSymbols.ReferenceLocation location)
+    private static string ClassifyReferenceKind(Microsoft.CodeAnalysis.FindSymbols.ReferenceLocation location)
     {
-        // Basic heuristic for reference kind based on location context
+        var syntaxTree = location.Location.SourceTree;
+        if (syntaxTree is null)
+            return "usage";
+
+        var root = syntaxTree.GetRoot();
+        var node = root.FindNode(location.Location.SourceSpan, findInsideTrivia: false, getInnermostNodeForTie: true);
+        if (node is null)
+            return "usage";
+
+        // Walk up to find meaningful parent context
+        for (var current = node.Parent; current is not null; current = current.Parent)
+        {
+            switch (current)
+            {
+                case BaseListSyntax:
+                case SimpleBaseTypeSyntax:
+                    return "inheritance";
+
+                case ObjectCreationExpressionSyntax:
+                case ImplicitObjectCreationExpressionSyntax:
+                    return "instantiation";
+
+                case InvocationExpressionSyntax:
+                    return "invocation";
+
+                case ParameterSyntax:
+                    return "parameter";
+
+                case TypeArgumentListSyntax:
+                    return "type-argument";
+
+                case AssignmentExpressionSyntax assignment
+                    when assignment.Left.Span.Contains(node.Span):
+                    return "assignment";
+
+                // Stop walking at statement/member boundaries
+                case StatementSyntax:
+                case MemberDeclarationSyntax:
+                    return "usage";
+            }
+        }
+
         return "usage";
     }
 }

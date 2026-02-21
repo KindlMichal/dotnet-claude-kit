@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Text.Json;
+using System.Xml.Linq;
 using ModelContextProtocol.Server;
 using CWM.RoslynNavigator.Responses;
 
@@ -27,15 +28,7 @@ public static class GetProjectGraphTool
                 .Select(r => solution.GetProject(r.ProjectId)?.Name ?? "unknown")
                 .ToList();
 
-            // Try to get target framework from parse options or project properties
-            var targetFramework = project.ParseOptions?.PreprocessorSymbolNames
-                .FirstOrDefault(s => s.StartsWith("NET")) ?? "unknown";
-
-            // Better approach: check compilation options
-            if (targetFramework == "unknown" && project.CompilationOptions is not null)
-            {
-                targetFramework = "net10.0"; // Default assumption for this solution
-            }
+            var targetFramework = DetectTargetFramework(project);
 
             return new ProjectInfo(
                 Name: project.Name,
@@ -49,5 +42,44 @@ public static class GetProjectGraphTool
             : "unknown";
 
         return Task.FromResult(JsonSerializer.Serialize(new ProjectGraphResult(solutionName, projects)));
+    }
+
+    private static string DetectTargetFramework(Microsoft.CodeAnalysis.Project project)
+    {
+        // Strategy 1: Parse from .csproj file (most reliable)
+        if (project.FilePath is not null && File.Exists(project.FilePath))
+        {
+            try
+            {
+                var doc = XDocument.Load(project.FilePath);
+                var tfm = doc.Root?.Descendants("TargetFramework").FirstOrDefault()?.Value;
+                if (!string.IsNullOrEmpty(tfm))
+                    return tfm;
+
+                // Multi-target: return first framework from TargetFrameworks
+                var tfms = doc.Root?.Descendants("TargetFrameworks").FirstOrDefault()?.Value;
+                if (!string.IsNullOrEmpty(tfms))
+                    return tfms.Split(';', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "unknown";
+            }
+            catch
+            {
+                // Fall through to next strategy
+            }
+        }
+
+        // Strategy 2: Check preprocessor symbols (e.g., NET10_0, NET8_0)
+        var preprocessorSymbol = project.ParseOptions?.PreprocessorSymbolNames
+            .Where(s => s.StartsWith("NET"))
+            .OrderByDescending(s => s.Length)
+            .FirstOrDefault();
+
+        if (preprocessorSymbol is not null)
+        {
+            // Convert "NET10_0" to "net10.0", "NET8_0_OR_GREATER" stays as-is but we prefer exact match
+            var exact = preprocessorSymbol.Replace("_OR_GREATER", "");
+            return exact.ToLowerInvariant().Replace('_', '.');
+        }
+
+        return "unknown";
     }
 }

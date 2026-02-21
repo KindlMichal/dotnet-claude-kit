@@ -3,7 +3,7 @@
   <p align="center">
     <strong>Make Claude Code an expert .NET developer.</strong>
     <br />
-    21 skills &bull; 8 specialist agents &bull; 5 project templates &bull; Roslyn MCP server
+    22 skills &bull; 8 specialist agents &bull; 5 project templates &bull; Roslyn MCP server
     <br />
     Built for .NET 10 / C# 14. Architecture-aware. Token-efficient.
   </p>
@@ -40,6 +40,19 @@ A curated knowledge layer that sits between Claude Code and your .NET project. D
 - How to navigate your codebase via Roslyn semantic analysis instead of expensive file reads
 
 **No configuration. No setup wizards. Just copy one file and go.**
+
+## Why dotnet-claude-kit?
+
+| Metric | Without Kit | With Kit | Impact |
+|--------|-------------|----------|--------|
+| **Architecture decisions** | Claude picks randomly | Asks questions, recommends with rationale | Correct architecture from day one |
+| **Code quality** | Generic C#, legacy patterns | Modern C# 14 with idiomatic .NET 10 | Zero "fix this pattern" revision cycles |
+| **Codebase navigation** | Reads entire files (500-2000+ tokens each) | Roslyn MCP queries (30-150 tokens each) | **~10x token savings** on exploration |
+| **Anti-patterns generated** | `DateTime.Now`, repository-over-EF, `new HttpClient()` | `TimeProvider`, direct DbContext, `IHttpClientFactory` | Production-ready on first generation |
+| **Testing approach** | In-memory fakes, mocked everything | `WebApplicationFactory` + `Testcontainers` | Tests that catch real bugs |
+| **Production resilience** | No retry, no circuit breakers | Polly v8 pipelines with telemetry | Handles transient failures automatically |
+
+**The result**: Less time reviewing and correcting Claude's output. More time shipping features.
 
 ## Installation
 
@@ -123,7 +136,7 @@ public static class CreateOrder
 
 ---
 
-## Skills (21)
+## Skills (22)
 
 Code-heavy reference files that teach Claude .NET best practices. Each skill is under 400 lines with concrete code examples, anti-patterns (BAD/GOOD comparisons), and decision guides.
 
@@ -133,7 +146,7 @@ Code-heavy reference files that teach Claude .NET best practices. Each skill is 
 | **Core Language** | [modern-csharp](skills/modern-csharp/SKILL.md) | Primary constructors, collection expressions, `field` keyword, records, pattern matching, spans |
 | **Web / API** | [minimal-api](skills/minimal-api/SKILL.md), [api-versioning](skills/api-versioning/SKILL.md), [authentication](skills/authentication/SKILL.md) | `MapGroup`, `TypedResults`, endpoint filters, JWT/OIDC, Asp.Versioning |
 | **Data** | [ef-core](skills/ef-core/SKILL.md) | No repository wrappers. Compiled queries, interceptors, `ExecuteUpdateAsync`, value converters |
-| **Resilience** | [error-handling](skills/error-handling/SKILL.md), [caching](skills/caching/SKILL.md), [messaging](skills/messaging/SKILL.md) | Result pattern, `HybridCache`, MassTransit, outbox, sagas |
+| **Resilience** | [error-handling](skills/error-handling/SKILL.md), [resilience](skills/resilience/SKILL.md), [caching](skills/caching/SKILL.md), [messaging](skills/messaging/SKILL.md) | Result pattern, Polly v8 pipelines, `HybridCache`, MassTransit, outbox, sagas |
 | **Observability** | [logging](skills/logging/SKILL.md) | Serilog structured logging, OpenTelemetry, correlation IDs |
 | **Testing** | [testing](skills/testing/SKILL.md) | xUnit v3, `WebApplicationFactory`, `Testcontainers`, Verify snapshots |
 | **DevOps** | [docker](skills/docker/SKILL.md), [ci-cd](skills/ci-cd/SKILL.md), [aspire](skills/aspire/SKILL.md) | Multi-stage builds, GitHub Actions, .NET Aspire orchestration |
@@ -179,6 +192,9 @@ Token-efficient codebase navigation via Roslyn semantic analysis. Instead of Cla
 | `get_type_hierarchy` | Inheritance chain + interfaces | Reading multiple files |
 | `get_project_graph` | Solution dependency tree | Parsing .csproj files manually |
 | `get_public_api` | Public API without full file | Reading entire source files |
+| `find_callers` | Find all methods calling a method | Manual grep for method name |
+| `find_overrides` | Find all overrides of virtual/abstract methods | Searching for `override` keyword |
+| `get_symbol_detail` | Full signature, params, XML docs | Reading entire source files |
 | `get_diagnostics` | Compiler warnings/errors | Running `dotnet build` and parsing |
 
 The MCP server starts automatically via `.mcp.json`. No manual setup required.

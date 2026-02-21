@@ -11,10 +11,13 @@ namespace CWM.RoslynNavigator;
 public sealed class WorkspaceManager : IDisposable
 {
     private const int LazyLoadThreshold = 50;
+    private const int MaxCachedCompilations = 30;
 
     private readonly ILogger<WorkspaceManager> _logger;
     private readonly SemaphoreSlim _writeLock = new(1, 1);
     private readonly ConcurrentDictionary<ProjectId, Compilation> _compilationCache = new();
+    private readonly ConcurrentDictionary<ProjectId, long> _cacheAccessOrder = new();
+    private long _accessCounter;
     private readonly List<FileSystemWatcher> _watchers = [];
 
     private MSBuildWorkspace? _workspace;
@@ -96,7 +99,10 @@ public sealed class WorkspaceManager : IDisposable
     public async Task<Compilation?> GetCompilationAsync(ProjectId projectId, CancellationToken ct = default)
     {
         if (_compilationCache.TryGetValue(projectId, out var cached))
+        {
+            _cacheAccessOrder[projectId] = Interlocked.Increment(ref _accessCounter);
             return cached;
+        }
 
         var project = _solution?.GetProject(projectId);
         if (project is null)
@@ -105,10 +111,32 @@ public sealed class WorkspaceManager : IDisposable
         var compilation = await project.GetCompilationAsync(ct);
         if (compilation is not null)
         {
+            EvictIfNeeded();
             _compilationCache[projectId] = compilation;
+            _cacheAccessOrder[projectId] = Interlocked.Increment(ref _accessCounter);
         }
 
         return compilation;
+    }
+
+    private void EvictIfNeeded()
+    {
+        if (!IsLazyLoading || _compilationCache.Count < MaxCachedCompilations)
+            return;
+
+        // Evict least-recently-used entries until under limit
+        var toEvict = _cacheAccessOrder
+            .OrderBy(kvp => kvp.Value)
+            .Take(_compilationCache.Count - MaxCachedCompilations + 1)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        foreach (var projectId in toEvict)
+        {
+            _compilationCache.TryRemove(projectId, out _);
+            _cacheAccessOrder.TryRemove(projectId, out _);
+            _logger.LogDebug("Evicted compilation cache for project {ProjectId}", projectId);
+        }
     }
 
     /// <summary>
@@ -215,6 +243,7 @@ public sealed class WorkspaceManager : IDisposable
 
                         // Invalidate compilation cache for the affected project
                         _compilationCache.TryRemove(document.Project.Id, out _);
+                        _cacheAccessOrder.TryRemove(document.Project.Id, out _);
                     }
                 }
                 finally
@@ -241,6 +270,7 @@ public sealed class WorkspaceManager : IDisposable
                 if (_solutionPath is not null)
                 {
                     _compilationCache.Clear();
+                    _cacheAccessOrder.Clear();
                     await LoadSolutionAsync(_solutionPath);
                 }
             }

@@ -39,3 +39,25 @@ public record DiagnosticInfo(string Id, string Severity, string Message, string 
 public record DiagnosticsResult(List<DiagnosticInfo> Diagnostics, int Count);
 
 public record StatusResponse(string State, string Message);
+
+public record CallerInfo(string Method, string ContainingType, string File, int Line);
+
+public record CallersResult(List<CallerInfo> Callers, int Count);
+
+public record OverrideInfo(string Method, string ContainingType, string File, int Line);
+
+public record OverridesResult(List<OverrideInfo> Overrides, int Count);
+
+public record ParameterDetail(string Name, string Type, string? DefaultValue);
+
+public record SymbolDetail(
+    string Name,
+    string Kind,
+    string Signature,
+    string? ReturnType,
+    string Accessibility,
+    string? Namespace,
+    List<ParameterDetail>? Parameters,
+    string? XmlDoc,
+    string File,
+    int Line);
