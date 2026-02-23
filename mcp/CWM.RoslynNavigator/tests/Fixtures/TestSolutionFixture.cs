@@ -1,7 +1,7 @@
+using CWM.RoslynNavigator;
 using Microsoft.Build.Locator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using CWM.RoslynNavigator;
 
 namespace CWM.RoslynNavigator.Tests.Fixtures;
 
