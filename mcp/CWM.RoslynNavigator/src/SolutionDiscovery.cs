@@ -19,7 +19,15 @@ public static class SolutionDiscovery
         var explicitPath = GetExplicitSolutionPath(args);
         if (explicitPath is not null)
         {
-            return File.Exists(explicitPath) ? Path.GetFullPath(explicitPath) : null;
+            // If the path points to a solution file, use it directly
+            if (File.Exists(explicitPath))
+                return Path.GetFullPath(explicitPath);
+
+            // If it's a directory, scan it for solution files
+            if (Directory.Exists(explicitPath))
+                return ScanDirectory(Path.GetFullPath(explicitPath));
+
+            return null;
         }
 
         // Scan the working directory

@@ -13,15 +13,23 @@ CWM.RoslynNavigator is a Model Context Protocol (MCP) server that provides Claud
 
 ## Tools
 
-| Tool | Description | Token Savings |
-|------|-------------|--------------|
-| `find_symbol` | Find where a type/method/property is defined | ~30-50 tokens vs 500+ loading files |
-| `find_references` | All usages of a symbol across the solution | ~50-150 tokens vs 2000+ scanning |
-| `find_implementations` | What implements an interface/overrides a method | ~30-80 tokens |
-| `get_type_hierarchy` | Inheritance chain + interfaces for a type | ~40-100 tokens |
-| `get_project_graph` | Solution project dependency tree | ~50-200 tokens |
-| `get_public_api` | Public members of a type (without full file) | ~100 tokens vs 500+ for full file |
-| `get_diagnostics` | Compiler + analyzer warnings/errors | ~50-300 tokens |
+| Tool | Description |
+|------|-------------|
+| `find_symbol` | Find where a type, method, or property is defined |
+| `find_references` | All usages of a symbol across the solution |
+| `find_implementations` | Types that implement an interface or derive from a base class |
+| `find_callers` | All methods that call a specific method |
+| `find_overrides` | Overrides of a virtual or abstract method |
+| `find_dead_code` | Unused types, methods, and properties |
+| `get_type_hierarchy` | Inheritance chain, interfaces, and derived types |
+| `get_public_api` | Public members of a type without reading the full file |
+| `get_symbol_detail` | Full signature, parameters, return type, and XML docs |
+| `get_project_graph` | Solution project dependency tree |
+| `get_dependency_graph` | Call dependency graph for a method |
+| `get_diagnostics` | Compiler and analyzer warnings/errors |
+| `get_test_coverage_map` | Heuristic test coverage by naming convention |
+| `detect_antipatterns` | .NET anti-patterns (async void, sync-over-async, etc.) |
+| `detect_circular_dependencies` | Circular dependency detection at project or type level |
 
 ## Installation
 
@@ -31,7 +39,7 @@ CWM.RoslynNavigator is a Model Context Protocol (MCP) server that provides Claud
 dotnet tool install -g CWM.RoslynNavigator
 ```
 
-Then add to your project's `.mcp.json`:
+Then add to your Claude Code global settings (`~/.claude/settings.json`):
 
 ```json
 {
@@ -44,6 +52,8 @@ Then add to your project's `.mcp.json`:
 }
 ```
 
+The `--solution` argument accepts either a direct path to a `.sln`/`.slnx` file or a directory to scan for solution files.
+
 ### As a Local Tool (per-repo)
 
 ```bash
@@ -51,7 +61,7 @@ dotnet new tool-manifest   # if you don't have one
 dotnet tool install CWM.RoslynNavigator
 ```
 
-Then reference with `dotnet tool run`:
+Then add to your project's `.mcp.json`:
 
 ```json
 {
@@ -70,6 +80,14 @@ Then reference with `dotnet tool run`:
 dotnet run --project mcp/CWM.RoslynNavigator/CWM.RoslynNavigator.csproj -- --solution /path/to/your/Solution.sln
 ```
 
+## Solution Discovery
+
+The server resolves the solution file in this order:
+
+1. **Explicit `--solution` argument** — Pass a `.sln`/`.slnx` file path directly, or a directory to scan
+2. **Working directory scan** — If no argument, scans the current working directory for solution files
+3. **Deterministic selection** — If multiple solutions exist, prefers one in the root directory, otherwise picks the first alphabetically
+
 ## Architecture
 
 ```
@@ -78,7 +96,7 @@ WorkspaceManager.cs     → MSBuildWorkspace lifecycle, file watching, compilati
 WorkspaceInitializer.cs → BackgroundService triggers workspace load on startup
 SolutionDiscovery.cs    → Auto-detect .sln/.slnx from args or working directory
 SymbolResolver.cs       → Cross-project symbol resolution with disambiguation
-Tools/                  → MCP tool implementations (7 read-only tools)
+Tools/                  → MCP tool implementations (15 read-only tools)
 Responses/              → Token-optimized JSON response DTOs
 ```
 
@@ -99,6 +117,9 @@ dotnet build mcp/CWM.RoslynNavigator/CWM.RoslynNavigator.csproj
 # Run tests
 dotnet test mcp/CWM.RoslynNavigator/tests/CWM.RoslynNavigator.Tests.csproj
 
-# Run manually
-dotnet run --project mcp/CWM.RoslynNavigator/CWM.RoslynNavigator.csproj -- --solution ./path/to/solution.sln
+# Run manually against a directory
+dotnet run --project mcp/CWM.RoslynNavigator/CWM.RoslynNavigator.csproj -- --solution /path/to/your/project/
+
+# Run manually against a solution file
+dotnet run --project mcp/CWM.RoslynNavigator/CWM.RoslynNavigator.csproj -- --solution /path/to/your/Solution.sln
 ```
