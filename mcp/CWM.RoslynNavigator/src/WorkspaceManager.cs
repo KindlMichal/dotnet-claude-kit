@@ -29,6 +29,8 @@ public sealed class WorkspaceManager : IDisposable
     private readonly ConcurrentDictionary<string, byte> _knownDocumentPaths = new(StringComparer.OrdinalIgnoreCase);
     private long _accessCounter;
     private int _rootsAttempted; // 0 = not tried, 1 = tried
+    private long _lastRefreshTicks;
+    private static readonly long RefreshCooldownTicks = TimeSpan.FromSeconds(5).Ticks;
 
     private MSBuildWorkspace? _workspace;
     private Solution? _solution;
@@ -295,57 +297,65 @@ public sealed class WorkspaceManager : IDisposable
     }
 
     /// <summary>
-    /// Refreshes the workspace to reflect on-disk changes. Checks for structural changes
-    /// (new files, changed .csproj) that require a full reload, then incrementally updates
-    /// any modified existing documents.
+    /// Refreshes the workspace to reflect on-disk changes. Skips if called within the
+    /// cooldown window (5s) to avoid expensive filesystem scans on rapid-fire tool calls.
+    /// Checks .csproj timestamps first (cheap), then scans for new files, then does
+    /// incremental text updates for modified documents.
     /// </summary>
     public async Task<bool> RefreshChangedDocumentsAsync(CancellationToken ct = default)
     {
         if (_solution is null || _solutionPath is null) return false;
 
-        // Phase 1: detect structural changes that require a full MSBuild reload.
-        // This runs outside the write lock because LoadSolutionAsync acquires it.
-        if (NeedsStructuralReload())
+        // Skip if we refreshed recently — MCP tool calls often come in bursts
+        var now = DateTime.UtcNow.Ticks;
+        var last = Interlocked.Read(ref _lastRefreshTicks);
+        if (now - last < RefreshCooldownTicks) return false;
+        Interlocked.Exchange(ref _lastRefreshTicks, now);
+
+        // Phase 1: check .csproj timestamps (cheap — just a few stat calls)
+        if (HasProjectFileChanged())
         {
+            _logger.LogInformation("Project file changed. Full reload needed.");
             _compilationCache.Clear();
             _cacheAccessOrder.Clear();
             await LoadSolutionAsync(_solutionPath, ct);
             return true;
         }
 
-        // Phase 2: incremental text updates for modified existing documents.
+        // Phase 2: check for new source files (uses EnumerationOptions to skip bin/obj at the OS level)
+        if (HasNewSourceFiles())
+        {
+            _logger.LogInformation("New source files detected. Full reload needed.");
+            _compilationCache.Clear();
+            _cacheAccessOrder.Clear();
+            await LoadSolutionAsync(_solutionPath, ct);
+            return true;
+        }
+
+        // Phase 3: incremental text updates for modified existing documents.
         await _writeLock.WaitAsync(ct);
         try
         {
             var refreshed = false;
 
-            foreach (var projectId in _solution.ProjectIds)
+            foreach (var (docId, lastKnown) in _knownFileTimestamps)
             {
-                var project = _solution.GetProject(projectId);
-                if (project is null) continue;
+                var document = _solution.GetDocument(docId);
+                if (document?.FilePath is null) continue;
 
-                foreach (var document in project.Documents)
-                {
-                    if (document.FilePath is null || !File.Exists(document.FilePath))
-                        continue;
+                var currentWriteTime = File.GetLastWriteTimeUtc(document.FilePath);
+                if (currentWriteTime <= lastKnown) continue;
 
-                    var currentWriteTime = File.GetLastWriteTimeUtc(document.FilePath);
+                var text = await File.ReadAllTextAsync(document.FilePath, ct);
+                var sourceText = Microsoft.CodeAnalysis.Text.SourceText.From(text);
+                _solution = _solution.WithDocumentText(docId, sourceText);
+                _knownFileTimestamps[docId] = currentWriteTime;
 
-                    if (_knownFileTimestamps.TryGetValue(document.Id, out var lastKnown)
-                        && currentWriteTime <= lastKnown)
-                        continue;
+                _compilationCache.TryRemove(document.Project.Id, out _);
+                _cacheAccessOrder.TryRemove(document.Project.Id, out _);
 
-                    var text = await File.ReadAllTextAsync(document.FilePath, ct);
-                    var sourceText = Microsoft.CodeAnalysis.Text.SourceText.From(text);
-                    _solution = _solution.WithDocumentText(document.Id, sourceText);
-                    _knownFileTimestamps[document.Id] = currentWriteTime;
-
-                    _compilationCache.TryRemove(project.Id, out _);
-                    _cacheAccessOrder.TryRemove(project.Id, out _);
-
-                    refreshed = true;
-                    _logger.LogDebug("Refreshed changed document: {Path}", document.FilePath);
-                }
+                refreshed = true;
+                _logger.LogDebug("Refreshed changed document: {Path}", document.FilePath);
             }
 
             return refreshed;
@@ -356,25 +366,26 @@ public sealed class WorkspaceManager : IDisposable
         }
     }
 
-    /// <summary>
-    /// Checks whether the project structure has changed on disk: a .csproj was modified,
-    /// or new source files were added to a project directory. Either case requires a full
-    /// MSBuild reload because the Roslyn Solution snapshot doesn't know about them.
-    /// </summary>
-    private bool NeedsStructuralReload()
+    private bool HasProjectFileChanged()
     {
-        // Check if any project file (.csproj) was modified
         foreach (var (path, lastKnown) in _projectFileTimestamps)
         {
             if (File.Exists(path) && File.GetLastWriteTimeUtc(path) > lastKnown)
-            {
-                _logger.LogInformation("Project file changed: {Path}. Full reload needed.", path);
                 return true;
-            }
         }
+        return false;
+    }
 
-        // Check for new .cs files in project directories (SDK-style projects auto-include via globs)
+    private bool HasNewSourceFiles()
+    {
         if (_solution is null) return false;
+
+        var options = new EnumerationOptions
+        {
+            RecurseSubdirectories = true,
+            IgnoreInaccessible = true,
+            AttributesToSkip = FileAttributes.Hidden | FileAttributes.System
+        };
 
         foreach (var projectId in _solution.ProjectIds)
         {
@@ -384,28 +395,20 @@ public sealed class WorkspaceManager : IDisposable
             var projectDir = Path.GetDirectoryName(project.FilePath);
             if (projectDir is null || !Directory.Exists(projectDir)) continue;
 
-            foreach (var file in Directory.EnumerateFiles(projectDir, "*.cs", SearchOption.AllDirectories))
+            foreach (var file in Directory.EnumerateFiles(projectDir, "*.cs", options))
             {
-                if (IsInBinObjDirectory(file, projectDir))
+                // Skip bin/obj — check cheaply via span to avoid allocation
+                var relative = Path.GetRelativePath(projectDir, file);
+                if (relative.StartsWith("bin", StringComparison.OrdinalIgnoreCase) ||
+                    relative.StartsWith("obj", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 if (!_knownDocumentPaths.ContainsKey(file))
-                {
-                    _logger.LogInformation("New source file detected: {Path}. Full reload needed.", file);
                     return true;
-                }
             }
         }
 
         return false;
-    }
-
-    private static bool IsInBinObjDirectory(string filePath, string projectDir)
-    {
-        var relative = Path.GetRelativePath(projectDir, filePath);
-        var sep = Path.DirectorySeparatorChar;
-        return relative.StartsWith($"bin{sep}", StringComparison.OrdinalIgnoreCase)
-            || relative.StartsWith($"obj{sep}", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Dispose()
