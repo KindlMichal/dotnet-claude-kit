@@ -1,182 +1,176 @@
 <p align="center">
   <h1 align="center">dotnet-claude-kit</h1>
   <p align="center">
-    <strong>Make Claude Code an expert .NET developer.</strong>
+    <strong>Claude Code expert na .NET vývoj.</strong>
     <br />
-    47 skills &bull; 10 specialist agents &bull; 15 slash commands &bull; 10 rules &bull; 5 project templates &bull; 15 MCP tools &bull; 7 hooks
+    47 skills &bull; 10 specializovaných agentů &bull; 15 slash příkazů &bull; 10 pravidel &bull; 5 šablon projektů &bull; 15 MCP nástrojů &bull; 7 hooků
     <br />
-    Built for .NET 10 / C# 14. Architecture-aware. Token-efficient.
+    Vytvořeno pro .NET 10 / C# 14. S povědomím o architektuře. Efektivní na tokeny.
   </p>
 </p>
 
 <p align="center">
-  <a href="#installation">Installation</a> &bull;
-  <a href="#quick-start">Quick Start</a> &bull;
-  <a href="#what-makes-this-10x">10x Features</a> &bull;
-  <a href="#slash-commands-16">Commands</a> &bull;
+  <a href="#instalace">Instalace</a> &bull;
+  <a href="#rychlý-start">Rychlý start</a> &bull;
+  <a href="#čím-je-to-10x-lepší">10x funkce</a> &bull;
+  <a href="#slash-příkazy-16">Příkazy</a> &bull;
   <a href="#skills-47">Skills</a> &bull;
-  <a href="#agents-10">Agents</a> &bull;
-  <a href="#rules-10">Rules</a> &bull;
-  <a href="#templates-5">Templates</a> &bull;
+  <a href="#agenti-10">Agenti</a> &bull;
+  <a href="#pravidla-10">Pravidla</a> &bull;
+  <a href="#šablony-5">Šablony</a> &bull;
   <a href="#roslyn-mcp-server">MCP Server</a> &bull;
-  <a href="#contributing">Contributing</a>
+  <a href="#přispívání">Přispívání</a>
 </p>
 
 ---
 
-## The Problem
+## Problém
 
-Claude Code is powerful, but out of the box it doesn't know **your** .NET conventions. It generates `DateTime.Now` instead of `TimeProvider`. It wraps EF Core in repository abstractions. It picks an architecture without asking about your domain. It reads entire source files when a Roslyn query would cost 10x fewer tokens.
+Claude Code je silný nástroj, ale bez dalšího nastavení nezná **vaše** .NET konvence. Generuje `DateTime.Now` místo `TimeProvider`. Obaluje EF Core do zbytečných repository abstrakcí. Zvolí architekturu, aniž by se zeptal na vaši doménu. Čte celé zdrojové soubory, když by Roslyn dotaz stál 10x méně tokenů.
 
-**dotnet-claude-kit fixes all of that.**
+**dotnet-claude-kit tohle všechno řeší.**
 
-## What This Is
+## Co to je
 
-A curated knowledge and action layer that sits between Claude Code and your .NET project. Drop a single `CLAUDE.md` into your repo and Claude instantly knows:
+Vrstva znalostí a akcí mezi Claude Code a .NET projektem. Stačí jediný `CLAUDE.md` v repo projektu a Claude okamžitě ví:
 
-- Which architecture fits your project (VSA, Clean Architecture, DDD, Modular Monolith)
-- How to write modern C# 14 with primary constructors, collection expressions, and records
-- How to build minimal APIs with `IEndpointGroup` auto-discovery, `TypedResults`, and proper OpenAPI metadata
-- How to use EF Core without repository wrappers, with compiled queries and interceptors
-- How to test with `WebApplicationFactory` + `Testcontainers` instead of in-memory fakes
-- How to navigate your codebase via Roslyn semantic analysis instead of expensive file reads
-- **How to scaffold complete features, run health checks, review PRs, and enforce conventions**
+- Která architektura vyhovuje projektu (VSA, Clean Architecture, DDD, Modular Monolith)
+- Jak psát moderní C# 14 s primárními konstruktory, výrazy kolekcí a záznamy (records)
+- Jak vytvářet minimal APIs s `IEndpointGroup` auto-discovery, `TypedResults` a správnými OpenAPI metadaty
+- Jak používat EF Core bez repository obalů, s kompilovanými dotazy a interceptory
+- Jak testovat pomocí `WebApplicationFactory` + `Testcontainers` místo in-memory fakeů
+- Jak procházet kódovou základnu přes sémantickou analýzu Roslyn místo drahého čtení souborů
+- **Jak scaffoldovat kompletní funkce, spouštět kontroly zdraví projektu, reviewovat PR a vynucovat konvence**
 
-**No configuration. No setup wizards. Just copy one file and go.**
+**Žádná konfigurace. Žádní průvodci nastavením. Stačí zkopírovat jeden soubor a jet.**
 
-## What Makes This 10x
+## Čím je to 10x lepší
 
-v0.4.0 adds an **action layer** on top of the knowledge layer — Claude doesn't just know the right patterns, it actively applies them:
+Nástroj přidává **akční vrstvu** nad znalostní vrstvu — Claude nejen zná správné vzory, ale aktivně je aplikuje:
 
-| Capability | What It Does |
-|-----------|-------------|
-| **Scaffolding** | One command → complete feature with Result pattern, validation (FluentValidation + filter wiring), OpenAPI metadata, pagination, CancellationToken, and tests. 9-point checklist enforced. All 4 architectures. |
-| **Interactive Setup** | Guided project initialization: architecture questionnaire → tech stack selection → customized CLAUDE.md generation. |
-| **Health Check** | Automated codebase analysis using MCP tools: anti-pattern scan, diagnostics, dead code detection, test coverage → graded report card. |
-| **PR Review** | Multi-dimensional code review: anti-patterns, diagnostics, API surface changes, blast radius, architecture compliance, test coverage. |
-| **Convention Learning** | Detects project-specific patterns (naming, structure, modifiers) and enforces them in new code. Adapts to your codebase. |
-| **Smart Tools** | 15 Roslyn-powered MCP tools including dependency graphs, circular dependency detection, dead code finder, and test coverage mapping. |
-| **Active Hooks** | 6 hooks for automated quality: format on edit, anti-pattern checks on commit, test result analysis, structure validation. |
+| Schopnost | Co dělá |
+|-----------|---------|
+| **Scaffolding** | Jeden příkaz → kompletní funkce s Result patternem, validací (FluentValidation + propojení filtrů), OpenAPI metadaty, stránkováním, CancellationToken a testy. Vynucený 9bodový checklist. Všechny 4 architektury. |
+| **Interaktivní nastavení** | Řízená inicializace projektu: dotazník architektury → výběr tech stacku → vygenerování přizpůsobeného `CLAUDE.md`. |
+| **Kontrola zdraví** | Automatizovaná analýza kódové základny pomocí MCP nástrojů: sken anti-vzorů, diagnostika, detekce mrtvého kódu, pokrytí testy → hodnocení známkami. |
+| **PR Review** | Vícerozměrné code review: anti-vzory, diagnostika, změny API rozhraní, dopadový rozsah, soulad s architekturou, pokrytí testy. |
+| **Učení konvencí** | Detekuje vzory specifické pro projekt (pojmenování, struktura, modifikátory) a vynucuje je v novém kódu. Přizpůsobuje se vaší kódové základně. |
+| **Chytré nástroje** | 15 MCP nástrojů poháněných Roslynem včetně grafů závislostí, detekce kruhových závislostí, hledání mrtvého kódu a mapování pokrytí testy. |
+| **Aktivní hooky** | 6 hooků pro automatizovanou kvalitu: formátování při editaci, kontrola anti-vzorů při commitu, analýza výsledků testů, validace struktury. |
 
-## Why dotnet-claude-kit?
+## Proč dotnet-claude-kit?
 
-| Metric | Without Kit | With Kit | Impact |
-|--------|-------------|----------|--------|
-| **Architecture decisions** | Claude picks randomly | Asks questions, recommends with rationale | Correct architecture from day one |
-| **Code quality** | Generic C#, legacy patterns | Modern C# 14 with idiomatic .NET 10 | Zero "fix this pattern" revision cycles |
-| **Codebase navigation** | Reads entire files (500-2000+ tokens each) | Roslyn MCP queries (30-150 tokens each) | **~10x token savings** on exploration |
-| **Anti-patterns generated** | `DateTime.Now`, repository-over-EF, `new HttpClient()` | `TimeProvider`, direct DbContext, `IHttpClientFactory` | Production-ready on first generation |
-| **Testing approach** | In-memory fakes, mocked everything | `WebApplicationFactory` + `Testcontainers` | Tests that catch real bugs |
-| **Production resilience** | No retry, no circuit breakers | Polly v8 pipelines with telemetry | Handles transient failures automatically |
+| Metrika | Bez kitu | S kitem | Dopad |
+|---------|----------|---------|-------|
+| **Rozhodování o architektuře** | Claude volí náhodně | Ptá se, doporučuje s odůvodněním | Správná architektura od prvního dne |
+| **Kvalita kódu** | Generický C#, zastaralé vzory | Moderní C# 14 s idiomatickým .NET 10 | Nulové revizní cykly typu „oprav tento vzor" |
+| **Navigace v kódu** | Čte celé soubory (500–2000+ tokenů každý) | Roslyn MCP dotazy (30–150 tokenů každý) | **~10x úspora tokenů** při průzkumu |
+| **Generované anti-vzory** | `DateTime.Now`, repository nad EF, `new HttpClient()` | `TimeProvider`, přímý DbContext, `IHttpClientFactory` | Produkční kvalita na první generování |
+| **Přístup k testování** | In-memory faky, mockování všeho | `WebApplicationFactory` + `Testcontainers` | Testy, které chytí skutečné chyby |
+| **Odolnost v produkci** | Žádné retry, žádné circuit breakery | Polly v8 pipelines s telemetrií | Automatické zvládání přechodných selhání |
 
-**The result**: Less time reviewing and correcting Claude's output. More time shipping features.
+**Výsledek**: Méně času na review a opravování výstupu Claude. Více času na dodávání funkcí.
 
-## Installation
+## Instalace
 
-### Plugin Install (Recommended)
+### Instalace pluginu (doporučeno)
 
-Install as a Claude Code plugin — all 47 skills, 10 agents, 16 commands, 10 rules, hooks, and MCP config activate globally:
+Nainstalujte jako Claude Code plugin — všech 47 skills, 10 agentů, 16 příkazů, 10 pravidel, hooky a MCP konfigurace se aktivují globálně:
 
 ```bash
-# In your terminal — install the Roslyn MCP server
+# V terminálu — nainstalovat Roslyn MCP server
 dotnet tool install -g CWM.RoslynNavigator
 ```
 
-Then inside a Claude Code session:
+Poté uvnitř Claude Code relace:
 
-```
-# Add the marketplace and install the plugin
-/plugin marketplace add codewithmukesh/dotnet-claude-kit
-/plugin install dotnet-claude-kit
-```
-
-**For local development/testing** (loads directly from disk, no install needed):
+**Pro lokální vývoj/testování** (načítá přímo z disku, bez instalace):
 
 ```bash
 claude --plugin-dir /path/to/dotnet-claude-kit
 ```
 
-### Per-Project Setup
+### Nastavení pro konkrétní projekt
 
-Navigate to your project directory (existing or empty) and run:
+Začátek projektu:
 
 ```bash
 /dotnet-init
 ```
 
-**Existing project?** It detects your solution, scans .csproj SDKs, reads your tech stack from config, asks architecture questions, and generates a customized `CLAUDE.md`.
+**Existující projekt?** Detekuje  solution, prohledá .csproj SDK, přečte tech stack z konfigurace, položí otázky o architektuře a vygeneruje přizpůsobený `CLAUDE.md`.
 
-**Greenfield project?** It asks what you're building, scaffolds the full solution structure (`dotnet new sln`, projects, `Directory.Build.props`, `src/` and `tests/` folders), then generates `CLAUDE.md`. Follow up with `/scaffold` to add your first feature.
+**Nový projekt od nuly?** Zeptá se na typ projektu a vytvoří celou strukturu solution (`dotnet new sln`, projekty, `Directory.Build.props`, složky `src/` a `tests/`), poté vygeneruje `CLAUDE.md`. Příkaz `/scaffold` je další krok pro přidání první funkce.
 
-No manual template copying needed.
+Není potřeba ruční kopírování šablon.
 
 <details>
-<summary><strong>Manual Template Copy (Alternative)</strong></summary>
+<summary><strong>Ruční kopírování šablony (alternativa)</strong></summary>
 
-If you prefer manual setup, copy the template matching your project type:
+Pro ruční nastavení stačí zkopírovat šablonu odpovídající typu projektu:
 
 ```bash
 cp templates/web-api/CLAUDE.md ./CLAUDE.md           # REST API
-cp templates/modular-monolith/CLAUDE.md ./CLAUDE.md   # Multi-module system
-cp templates/blazor-app/CLAUDE.md ./CLAUDE.md          # Blazor app
+cp templates/modular-monolith/CLAUDE.md ./CLAUDE.md   # Multi-modulový systém
+cp templates/blazor-app/CLAUDE.md ./CLAUDE.md          # Blazor aplikace
 cp templates/worker-service/CLAUDE.md ./CLAUDE.md      # Background workers
-cp templates/class-library/CLAUDE.md ./CLAUDE.md       # NuGet packages
+cp templates/class-library/CLAUDE.md ./CLAUDE.md       # NuGet balíčky
 ```
 
-Replace `[ProjectName]`, update tech stack, choose your architecture.
+Nahradit `[ProjectName]`, aktualizovat tech stack, vybrat architekturu.
 
 </details>
 
-Start Claude Code — 47 skills, 10 agents, 16 commands, 10 rules, and 15 MCP tools activate automatically.
+Po spuštění Claude Code — 47 skills, 10 agentů, 16 příkazů, 10 pravidel a 15 MCP nástrojů se aktivuje automaticky.
 
-That's it. Claude now writes .NET code the way a senior .NET engineer would.
+To je vše. Claude nyní píše .NET kód tak, jak by to dělal zkušený .NET inženýr.
 
 <details>
-<summary><strong>Manual Install (Alternative)</strong></summary>
+<summary><strong>Ruční instalace (alternativa)</strong></summary>
 
-If you prefer to clone the repo and wire things up manually:
+Pokud preferujete naklonovat repozitář a propojit vše ručně ta, že se:
 
 ```bash
-# 1. Install the MCP server globally
+# 1. Nainstaluje MCP server globálně
 dotnet tool install -g CWM.RoslynNavigator
 
-# 2. Register it in Claude Code at user scope (available in ALL projects)
+# 2. Zaregistruje v Claude Code na úrovni uživatele (dostupný ve VŠECH projektech)
 claude mcp add --scope user cwm-roslyn-navigator -- cwm-roslyn-navigator --solution ${workspaceFolder}
 
-# 3. Clone the kit
+# 3. Naklonuje kit
 git clone https://github.com/codewithmukesh/dotnet-claude-kit.git
 
-# 4. Load as a local plugin (or copy a template manually)
+# 4. Načte jako lokální plugin (nebo zkopíruje šablona ručně)
 claude --plugin-dir ./dotnet-claude-kit
 ```
 
 </details>
 
-## What You Get
+## Co to přinese
 
-### Before dotnet-claude-kit
+### Před dotnet-claude-kit
 
 ```csharp
-// Claude generates this
+// Claude vygeneruje toto
 public class OrderService
 {
-    private readonly IOrderRepository _repo;  // unnecessary abstraction over EF Core
+    private readonly IOrderRepository _repo;  // zbytečná abstrakce nad EF Core
 
     public async Task<Order> CreateOrder(CreateOrderDto dto)
     {
         var order = new Order();
-        order.CreatedAt = DateTime.Now;  // wrong — use TimeProvider
+        order.CreatedAt = DateTime.Now;  // špatně — použijte TimeProvider
         order.Items = dto.Items.ToList();
         await _repo.AddAsync(order);
-        return order;  // leaks domain entity to API
+        return order;  // únik doménové entity do API
     }
 }
 ```
 
-### After dotnet-claude-kit
+### Po dotnet-claude-kit
 
 ```csharp
-// Claude generates this
+// Claude vygeneruje toto
 public static class CreateOrder
 {
     public record Command(string CustomerId, List<OrderItemDto> Items) : IRequest<Result<Response>>;
@@ -197,7 +191,7 @@ public static class CreateOrder
 ```
 
 ```csharp
-// Each endpoint group auto-discovered — Program.cs never changes
+// Každá skupina endpointů je auto-discovered — Program.cs se nikdy nemění
 public sealed class OrderEndpoints : IEndpointGroup
 {
     public void Map(IEndpointRouteBuilder app)
@@ -211,217 +205,197 @@ public sealed class OrderEndpoints : IEndpointGroup
 }
 ```
 
-**Result pattern. FluentValidation with endpoint filters. IEndpointGroup auto-discovery. TypedResults with OpenAPI metadata. CancellationToken everywhere. Sealed handlers. TimeProvider injection. DbContext directly.** Every pattern comes from the skills in this kit.
+**Result pattern. FluentValidation s endpoint filtry. IEndpointGroup auto-discovery. TypedResults s OpenAPI metadaty. CancellationToken všude. Zapečetěné handlery. TimeProvider injekce. DbContext přímo.** Každý vzor pochází ze skills v tomto kitu.
 
 ---
 
-## Slash Commands (16)
+## Slash příkazy (16)
 
-Shortcut workflows that orchestrate skills and agents. Type the command and Claude handles the rest.
+Zkratkové workflow, které orchestrují skills a agenty. Zadejte příkaz a Claude se postará o zbytek.
 
-| Command | Purpose | Invokes |
-|---------|---------|---------|
-| `/dotnet-init` | Project setup (existing or greenfield) — detects or scaffolds, then generates CLAUDE.md | project-setup skill, dotnet-architect agent |
-| `/plan` | Architecture-aware planning for non-trivial tasks | architecture-advisor skill, dotnet-architect agent |
-| `/verify` | 7-phase verification: build → analyzers → antipatterns → tests → security → format → diff | verification-loop skill |
-| `/tdd` | Red-green-refactor with xUnit + Testcontainers | testing skill, test-engineer agent |
-| `/scaffold` | Architecture-aware feature scaffolding (all 4 architectures) | scaffolding skill, dotnet-architect agent |
-| `/code-review` | MCP-powered multi-dimensional code review | code-review-workflow skill, code-reviewer agent |
-| `/build-fix` | Autonomous build error fixing (iterative loop) | autonomous-loops skill, build-error-resolver agent |
-| `/checkpoint` | Save progress: commit + handoff note | wrap-up-ritual skill |
-| `/security-scan` | OWASP + secrets + vulnerable dependency audit | security-scan skill, security-auditor agent |
-| `/migrate` | Safe EF Core migration workflow | migration-workflow skill, ef-core-specialist agent |
-| `/health-check` | Project health assessment with letter grades (A-F) | health-check skill, code-reviewer agent |
-| `/de-sloppify` | Systematic cleanup: format → dead code → analyzers → sealed | de-sloppify skill, refactor-cleaner agent |
-| `/wrap-up` | Session ending ritual with handoff note | wrap-up-ritual skill |
-| `/instinct-status` | Show learned instincts with confidence scores | instinct-system skill |
-| `/instinct-export` | Export instincts to shareable format | instinct-system skill |
-| `/instinct-import` | Import instincts from another project | instinct-system skill |
+| Příkaz | Účel | Vyvolává |
+|--------|------|----------|
+| `/dotnet-init` | Nastavení projektu (existující nebo nový) — detekuje nebo scaffolduje, poté generuje CLAUDE.md | project-setup skill, dotnet-architect agent |
+| `/plan` | Plánování s povědomím o architektuře pro netriviální úlohy | architecture-advisor skill, dotnet-architect agent |
+| `/verify` | 7fázová verifikace: build → analyzátory → anti-vzory → testy → bezpečnost → formátování → diff | verification-loop skill |
+| `/tdd` | Red-green-refactor s xUnit + Testcontainers | testing skill, test-engineer agent |
+| `/scaffold` | Scaffolding funkcí s povědomím o architektuře (všechny 4 architektury) | scaffolding skill, dotnet-architect agent |
+| `/code-review` | Vícerozměrné code review poháněné MCP | code-review-workflow skill, code-reviewer agent |
+| `/build-fix` | Autonomní oprava build chyb (iterativní smyčka) | autonomous-loops skill, build-error-resolver agent |
+| `/checkpoint` | Uložení průběhu: commit + poznámka k předání | wrap-up-ritual skill |
+| `/security-scan` | OWASP + secrets + audit zranitelných závislostí | security-scan skill, security-auditor agent |
+| `/migrate` | Bezpečný EF Core migrační workflow | migration-workflow skill, ef-core-specialist agent |
+| `/health-check` | Hodnocení zdraví projektu písmennými známkami (A–F) | health-check skill, code-reviewer agent |
+| `/de-sloppify` | Systematický úklid: formátování → mrtvý kód → analyzátory → sealed | de-sloppify skill, refactor-cleaner agent |
+| `/wrap-up` | Rituál ukončení relace s poznámkou k předání | wrap-up-ritual skill |
+| `/instinct-status` | Zobrazení naučených instinktů se skóre spolehlivosti | instinct-system skill |
+| `/instinct-export` | Export instinktů do sdílitelného formátu | instinct-system skill |
+| `/instinct-import` | Import instinktů z jiného projektu | instinct-system skill |
 
-## Rules (10)
+## Pravidla (10)
 
-Always-loaded conventions that apply to every interaction. Zero configuration — they're active as soon as the plugin is installed.
+Vždy načtené konvence, které se aplikují na každou interakci. Nulová konfigurace — jsou aktivní ihned po instalaci pluginu.
 
-| Rule | Enforces |
-|------|----------|
-| [coding-style](.claude/rules/coding-style.md) | C# 14 conventions, file-scoped namespaces, primary constructors, sealed, records |
-| [architecture](.claude/rules/architecture.md) | Ask before recommending, no repo over EF, feature folders, dependency direction |
-| [security](.claude/rules/security.md) | No hardcoded secrets, parameterized queries, explicit auth, HTTPS |
-| [testing](.claude/rules/testing.md) | Integration-first, WebApplicationFactory + Testcontainers, AAA pattern |
-| [performance](.claude/rules/performance.md) | CancellationToken propagation, TimeProvider, IHttpClientFactory, HybridCache |
-| [error-handling](.claude/rules/error-handling.md) | Result pattern, ProblemDetails, no broad catch, boundary validation |
-| [git-workflow](.claude/rules/git-workflow.md) | Conventional commits, atomic commits, never force-push main |
-| [agents](.claude/rules/agents.md) | MCP-first, subagent routing, skill loading order |
-| [hooks](.claude/rules/hooks.md) | Auto-accept formatting, never skip pre-commit hooks |
-| [packages](.claude/rules/packages.md) | Always use latest stable NuGet versions, never rely on training data versions |
+| Pravidlo | Vynucuje |
+|----------|----------|
+| [coding-style](.claude/rules/coding-style.md) | Konvence C# 14, file-scoped namespaces, primární konstruktory, sealed, records |
+| [architecture](.claude/rules/architecture.md) | Ptát se před doporučením, žádný repository nad EF, feature složky, směr závislostí |
+| [security](.claude/rules/security.md) | Žádná natvrdo zapsaná tajemství, parametrizované dotazy, explicitní autorizace, HTTPS |
+| [testing](.claude/rules/testing.md) | Integrace na prvním místě, WebApplicationFactory + Testcontainers, AAA vzor |
+| [performance](.claude/rules/performance.md) | Propagace CancellationToken, TimeProvider, IHttpClientFactory, HybridCache |
+| [error-handling](.claude/rules/error-handling.md) | Result pattern, ProblemDetails, žádný široký catch, validace na hranicích |
+| [git-workflow](.claude/rules/git-workflow.md) | Conventional commits, atomické commity, nikdy force-push na main |
+| [agents](.claude/rules/agents.md) | MCP-first, směrování subagentů, pořadí načítání skills |
+| [hooks](.claude/rules/hooks.md) | Automatické přijímání formátování, nikdy přeskakovat pre-commit hooky |
+| [packages](.claude/rules/packages.md) | Vždy používat nejnovější stabilní verze NuGet, nikdy se spoléhat na verze z trénovacích dat |
 
 ## Skills (47)
 
-Code-heavy reference files that teach Claude .NET best practices. Each skill is under 400 lines with concrete code examples, anti-patterns (BAD/GOOD comparisons), and decision guides.
+Soubory s referenčním kódem, které učí Claude osvědčené postupy .NET. Každý skill má méně než 400 řádků s konkrétními příklady kódu, anti-vzory (porovnání ŠPATNĚ/DOBŘE) a rozhodovacími průvodci.
 
-| Category | Skills | What Claude Learns |
-|----------|--------|--------------------|
-| **Architecture** | [architecture-advisor](skills/architecture-advisor/SKILL.md), [vertical-slice](skills/vertical-slice/SKILL.md), [clean-architecture](skills/clean-architecture/SKILL.md), [ddd](skills/ddd/SKILL.md), [project-structure](skills/project-structure/SKILL.md) | Ask before recommending. VSA for CRUD, CA for medium complexity, DDD for rich domains, Modular Monolith for bounded contexts. |
-| **Core Language** | [modern-csharp](skills/modern-csharp/SKILL.md) | Primary constructors, collection expressions, `field` keyword, records, pattern matching, spans |
-| **Web / API** | [minimal-api](skills/minimal-api/SKILL.md), [api-versioning](skills/api-versioning/SKILL.md), [authentication](skills/authentication/SKILL.md) | `MapGroup`, `TypedResults`, endpoint filters, JWT/OIDC, Asp.Versioning |
-| **Data** | [ef-core](skills/ef-core/SKILL.md) | No repository wrappers. Compiled queries, interceptors, `ExecuteUpdateAsync`, value converters |
-| **Resilience** | [error-handling](skills/error-handling/SKILL.md), [resilience](skills/resilience/SKILL.md), [caching](skills/caching/SKILL.md), [messaging](skills/messaging/SKILL.md) | Result pattern, Polly v8 pipelines, `HybridCache`, Wolverine/MassTransit, outbox, sagas |
-| **Observability** | [logging](skills/logging/SKILL.md) | Serilog structured logging, OpenTelemetry, correlation IDs |
-| **Testing** | [testing](skills/testing/SKILL.md) | xUnit v3, `WebApplicationFactory`, `Testcontainers`, Verify snapshots |
-| **DevOps** | [docker](skills/docker/SKILL.md), [ci-cd](skills/ci-cd/SKILL.md), [aspire](skills/aspire/SKILL.md) | Multi-stage builds, GitHub Actions, .NET Aspire orchestration |
-| **Cross-cutting** | [dependency-injection](skills/dependency-injection/SKILL.md), [configuration](skills/configuration/SKILL.md) | Keyed services, Options pattern, secrets management |
-| **Workflow** | [workflow-mastery](skills/workflow-mastery/SKILL.md) | Parallel worktrees, plan mode strategy, verification loops, auto-format hooks, permission setup, subagent patterns |
-| **Workflows & Automation** | [scaffolding](skills/scaffolding/SKILL.md), [project-setup](skills/project-setup/SKILL.md), [code-review-workflow](skills/code-review-workflow/SKILL.md), [migration-workflow](skills/migration-workflow/SKILL.md), [convention-learner](skills/convention-learner/SKILL.md) | Feature scaffolding for all architectures, interactive project init, MCP-driven PR reviews, safe migration workflows, convention detection and enforcement |
-| **Verification & Quality** | [verification-loop](skills/verification-loop/SKILL.md), [de-sloppify](skills/de-sloppify/SKILL.md), [health-check](skills/health-check/SKILL.md), [security-scan](skills/security-scan/SKILL.md) | 7-phase verification pipeline, systematic cleanup, graded health assessment, deep security scanning |
-| **Intelligence & Learning** | [instinct-system](skills/instinct-system/SKILL.md), [session-management](skills/session-management/SKILL.md), [autonomous-loops](skills/autonomous-loops/SKILL.md) | Confidence-scored pattern learning, session continuity, bounded iterative fix loops |
-| **Meta & Productivity** | [self-correction-loop](skills/self-correction-loop/SKILL.md), [wrap-up-ritual](skills/wrap-up-ritual/SKILL.md), [context-discipline](skills/context-discipline/SKILL.md), [model-selection](skills/model-selection/SKILL.md), [80-20-review](skills/80-20-review/SKILL.md), [split-memory](skills/split-memory/SKILL.md), [learning-log](skills/learning-log/SKILL.md) | Self-improving correction capture, structured session handoffs, token budget management, strategic model selection, focused code review, modular CLAUDE.md, insight documentation |
+| Kategorie | Skills | Co se Claude naučí |
+|-----------|--------|--------------------|
+| **Architektura** | [architecture-advisor](skills/architecture-advisor/SKILL.md), [vertical-slice](skills/vertical-slice/SKILL.md), [clean-architecture](skills/clean-architecture/SKILL.md), [ddd](skills/ddd/SKILL.md), [project-structure](skills/project-structure/SKILL.md) | Ptát se před doporučením. VSA pro CRUD, CA pro střední složitost, DDD pro bohaté domény, Modular Monolith pro bounded contexts. |
+| **Jádro jazyka** | [modern-csharp](skills/modern-csharp/SKILL.md) | Primární konstruktory, výrazy kolekcí, klíčové slovo `field`, records, pattern matching, spans |
+| **Web / API** | [minimal-api](skills/minimal-api/SKILL.md), [api-versioning](skills/api-versioning/SKILL.md), [authentication](skills/authentication/SKILL.md) | `MapGroup`, `TypedResults`, endpoint filtry, JWT/OIDC, Asp.Versioning |
+| **Data** | [ef-core](skills/ef-core/SKILL.md) | Žádné repository obaly. Kompilované dotazy, interceptory, `ExecuteUpdateAsync`, value convertery |
+| **Odolnost** | [error-handling](skills/error-handling/SKILL.md), [resilience](skills/resilience/SKILL.md), [caching](skills/caching/SKILL.md), [messaging](skills/messaging/SKILL.md) | Result pattern, Polly v8 pipelines, `HybridCache`, Wolverine/MassTransit, outbox, ságy |
+| **Pozorovatelnost** | [logging](skills/logging/SKILL.md) | Serilog strukturované logování, OpenTelemetry, korelační ID |
+| **Testování** | [testing](skills/testing/SKILL.md) | xUnit v3, `WebApplicationFactory`, `Testcontainers`, Verify snapshoty |
+| **DevOps** | [docker](skills/docker/SKILL.md), [ci-cd](skills/ci-cd/SKILL.md), [aspire](skills/aspire/SKILL.md) | Multi-stage buildy, GitHub Actions, .NET Aspire orchestrace |
+| **Průřezové** | [dependency-injection](skills/dependency-injection/SKILL.md), [configuration](skills/configuration/SKILL.md) | Keyed services, Options pattern, správa tajemství |
+| **Workflow** | [workflow-mastery](skills/workflow-mastery/SKILL.md) | Paralelní worktrees, strategie plan mode, verifikační smyčky, auto-format hooky, nastavení oprávnění, vzory subagentů |
+| **Workflow a automatizace** | [scaffolding](skills/scaffolding/SKILL.md), [project-setup](skills/project-setup/SKILL.md), [code-review-workflow](skills/code-review-workflow/SKILL.md), [migration-workflow](skills/migration-workflow/SKILL.md), [convention-learner](skills/convention-learner/SKILL.md) | Scaffolding funkcí pro všechny architektury, interaktivní init projektu, MCP-řízené PR review, bezpečné migrační workflow, detekce a vynucování konvencí |
+| **Verifikace a kvalita** | [verification-loop](skills/verification-loop/SKILL.md), [de-sloppify](skills/de-sloppify/SKILL.md), [health-check](skills/health-check/SKILL.md), [security-scan](skills/security-scan/SKILL.md) | 7fázová verifikační pipeline, systematický úklid, hodnocení zdraví známkami, hloubkové bezpečnostní skenování |
+| **Inteligence a učení** | [instinct-system](skills/instinct-system/SKILL.md), [session-management](skills/session-management/SKILL.md), [autonomous-loops](skills/autonomous-loops/SKILL.md) | Učení vzorů se skóre spolehlivosti, kontinuita relací, ohraničené iterativní opravné smyčky |
+| **Meta a produktivita** | [self-correction-loop](skills/self-correction-loop/SKILL.md), [wrap-up-ritual](skills/wrap-up-ritual/SKILL.md), [context-discipline](skills/context-discipline/SKILL.md), [model-selection](skills/model-selection/SKILL.md), [80-20-review](skills/80-20-review/SKILL.md), [split-memory](skills/split-memory/SKILL.md), [learning-log](skills/learning-log/SKILL.md) | Sebezdokonalující zachycení korekcí, strukturované předávání relací, správa tokenového rozpočtu, strategický výběr modelu, zaměřené code review, modulární CLAUDE.md, dokumentace poznatků |
 
-## Agents (10)
+## Agenti (10)
 
-Specialist agents that Claude routes queries to automatically. Each agent loads the right skills, uses MCP tools for context, and knows its boundaries.
+Specializovaní agenti, na které Claude automaticky směruje dotazy. Každý agent načítá správné skills, používá MCP nástroje pro kontext a zná své hranice.
 
-| Agent | When It Activates | What It Does |
-|-------|-------------------|-------------|
-| [dotnet-architect](agents/dotnet-architect.md) | "set up project", "architecture", "scaffold feature", "init project" | Runs the architecture questionnaire, scaffolds features, initializes projects |
-| [api-designer](agents/api-designer.md) | "create endpoint", "OpenAPI", "versioning" | Designs minimal API endpoints with proper metadata, versioning, and auth |
-| [ef-core-specialist](agents/ef-core-specialist.md) | "database", "migration", "query", "DbContext" | Optimizes queries, configures entities, manages migrations safely |
-| [test-engineer](agents/test-engineer.md) | "write tests", "test strategy", "coverage" | Integration-first testing with real databases via Testcontainers |
-| [security-auditor](agents/security-auditor.md) | "security", "authentication", "JWT" | OWASP top 10, auth configuration, secrets management |
-| [performance-analyst](agents/performance-analyst.md) | "performance", "benchmark", "caching" | Identifies hot paths, configures HybridCache, async optimization |
-| [devops-engineer](agents/devops-engineer.md) | "Docker", "CI/CD", "Aspire", "deploy" | Multi-stage Dockerfiles, GitHub Actions pipelines, Aspire orchestration |
-| [code-reviewer](agents/code-reviewer.md) | "review this code", "PR review", "health check", "conventions" | MCP-driven multi-dimensional review, convention detection and enforcement |
-| [build-error-resolver](agents/build-error-resolver.md) | "fix build", "build errors", "won't compile" | Autonomous build-fix loop: parse errors → categorize → fix → rebuild |
-| [refactor-cleaner](agents/refactor-cleaner.md) | "clean up", "dead code", "de-sloppify" | Systematic cleanup: dead code removal, formatting, sealing, CancellationToken |
+| Agent | Kdy se aktivuje | Co dělá |
+|-------|-----------------|---------|
+| [dotnet-architect](agents/dotnet-architect.md) | „nastav projekt", „architektura", „scaffold funkce", „init projekt" | Spouští dotazník architektury, scaffolduje funkce, inicializuje projekty |
+| [api-designer](agents/api-designer.md) | „vytvoř endpoint", „OpenAPI", „verzování" | Navrhuje minimal API endpointy se správnými metadaty, verzováním a autorizací |
+| [ef-core-specialist](agents/ef-core-specialist.md) | „databáze", „migrace", „dotaz", „DbContext" | Optimalizuje dotazy, konfiguruje entity, bezpečně spravuje migrace |
+| [test-engineer](agents/test-engineer.md) | „napiš testy", „testovací strategie", „pokrytí" | Integrace na prvním místě s reálnými databázemi přes Testcontainers |
+| [security-auditor](agents/security-auditor.md) | „bezpečnost", „autentizace", „JWT" | OWASP top 10, konfigurace autorizace, správa tajemství |
+| [performance-analyst](agents/performance-analyst.md) | „výkon", „benchmark", „cachování" | Identifikuje horká místa, konfiguruje HybridCache, optimalizace async |
+| [devops-engineer](agents/devops-engineer.md) | „Docker", „CI/CD", „Aspire", „nasazení" | Multi-stage Dockerfiles, GitHub Actions pipelines, Aspire orchestrace |
+| [code-reviewer](agents/code-reviewer.md) | „zkontroluj kód", „PR review", „kontrola zdraví", „konvence" | MCP-řízené vícerozměrné review, detekce a vynucování konvencí |
+| [build-error-resolver](agents/build-error-resolver.md) | „oprav build", „chyby buildu", „nekompiluje se" | Autonomní smyčka opravy buildu: parsování chyb → kategorizace → oprava → rebuild |
+| [refactor-cleaner](agents/refactor-cleaner.md) | „uklidit", „mrtvý kód", „de-sloppify" | Systematický úklid: odstranění mrtvého kódu, formátování, sealed, CancellationToken |
 
-## Templates (5)
+## Šablony (5)
 
-Drop-in `CLAUDE.md` files that configure Claude for specific project types. Copy one file, replace the placeholders, done.
+Připravené `CLAUDE.md` soubory, které konfigurují Claude pro konkrétní typy projektů. Zkopírujte jeden soubor, nahraďte zástupné texty, hotovo.
 
-| Template | For | Includes |
-|----------|-----|----------|
-| [web-api](templates/web-api/) | REST APIs, microservices | Architecture options (VSA/CA/DDD), minimal APIs, EF Core, testing |
-| [modular-monolith](templates/modular-monolith/) | Multi-module systems | Module boundaries, per-module DbContext, Wolverine/MassTransit integration events |
-| [blazor-app](templates/blazor-app/) | Blazor Server / WASM / Auto | Component organization, render mode strategy, bUnit testing |
-| [worker-service](templates/worker-service/) | Background processing | BackgroundService patterns, Wolverine/MassTransit consumers, proper cancellation |
-| [class-library](templates/class-library/) | NuGet packages, shared libraries | Public API design, XML docs, semantic versioning, SourceLink |
+| Šablona | Pro | Zahrnuje |
+|---------|-----|----------|
+| [web-api](templates/web-api/) | REST API, mikroservisy | Možnosti architektury (VSA/CA/DDD), minimal APIs, EF Core, testování |
+| [modular-monolith](templates/modular-monolith/) | Multi-modulové systémy | Hranice modulů, per-modul DbContext, Wolverine/MassTransit integrační události |
+| [blazor-app](templates/blazor-app/) | Blazor Server / WASM / Auto | Organizace komponent, strategie render mode, bUnit testování |
+| [worker-service](templates/worker-service/) | Background zpracování | Vzory BackgroundService, Wolverine/MassTransit consumery, správná cancellation |
+| [class-library](templates/class-library/) | NuGet balíčky, sdílené knihovny | Design veřejného API, XML dokumentace, sémantické verzování, SourceLink |
 
 ## Roslyn MCP Server
 
-Token-efficient codebase navigation via Roslyn semantic analysis. Instead of Claude reading entire source files (500-2000+ tokens each), it queries the MCP server for exactly what it needs (30-150 tokens).
+Tokenově efektivní navigace kódovou základnou přes sémantickou analýzu Roslyn. Místo toho, aby Claude četl celé zdrojové soubory (500–2000+ tokenů každý), dotazuje MCP server přesně na to, co potřebuje (30–150 tokenů).
 
-| Tool | What It Does | Replaces |
-|------|-------------|----------|
-| `find_symbol` | Locate type/method definitions | Grep/Glob across all .cs files |
-| `find_references` | Find all usages of a symbol | Grep for the type name |
-| `find_implementations` | Find interface implementors | Searching for `: IInterface` |
-| `find_callers` | Find all methods calling a method | Manual grep for method name |
-| `find_overrides` | Find overrides of virtual/abstract methods | Searching for `override` keyword |
-| `get_type_hierarchy` | Inheritance chain + interfaces | Reading multiple files |
-| `get_project_graph` | Solution dependency tree | Parsing .csproj files manually |
-| `get_public_api` | Public API without full file | Reading entire source files |
-| `get_symbol_detail` | Full signature, params, XML docs | Reading entire source files |
-| `get_diagnostics` | Compiler warnings/errors | Running `dotnet build` and parsing |
-| `detect_antipatterns` | 10 .NET anti-pattern rules | Manual code review |
-| `find_dead_code` | Unused types, methods, properties | Manual inspection of all files |
-| `detect_circular_dependencies` | Project and type-level cycles | Manually tracing references |
-| `get_dependency_graph` | Method call chain visualization | Reading multiple files and tracing |
-| `get_test_coverage_map` | Heuristic test coverage mapping | Searching for test files manually |
+| Nástroj | Co dělá | Nahrazuje |
+|---------|---------|-----------|
+| `find_symbol` | Lokalizace definic typů/metod | Grep/Glob přes všechny .cs soubory |
+| `find_references` | Nalezení všech použití symbolu | Grep názvu typu |
+| `find_implementations` | Nalezení implementátorů rozhraní | Hledání `: IInterface` |
+| `find_callers` | Nalezení všech metod volajících metodu | Ruční grep názvu metody |
+| `find_overrides` | Nalezení přepsání virtual/abstract metod | Hledání klíčového slova `override` |
+| `get_type_hierarchy` | Řetězec dědičnosti + rozhraní | Čtení více souborů |
+| `get_project_graph` | Strom závislostí solution | Ruční parsování .csproj souborů |
+| `get_public_api` | Veřejné API bez celého souboru | Čtení celých zdrojových souborů |
+| `get_symbol_detail` | Plná signatura, parametry, XML dokumentace | Čtení celých zdrojových souborů |
+| `get_diagnostics` | Varování/chyby kompilátoru | Spuštění `dotnet build` a parsování |
+| `detect_antipatterns` | 10 pravidel .NET anti-vzorů | Ruční code review |
+| `find_dead_code` | Nepoužívané typy, metody, vlastnosti | Ruční kontrola všech souborů |
+| `detect_circular_dependencies` | Cykly na úrovni projektů a typů | Ruční trasování referencí |
+| `get_dependency_graph` | Vizualizace řetězce volání metod | Čtení více souborů a trasování |
+| `get_test_coverage_map` | Heuristické mapování pokrytí testy | Ruční hledání testových souborů |
 
-The MCP server starts automatically via `.mcp.json`. No manual setup required.
+MCP server se spouští automaticky přes `.mcp.json`. Není potřeba ruční nastavení.
 
-See [mcp/CWM.RoslynNavigator/README.md](mcp/CWM.RoslynNavigator/README.md) for details.
+Viz [mcp/CWM.RoslynNavigator/README.md](mcp/CWM.RoslynNavigator/README.md) pro podrobnosti.
 
-## Knowledge Base
+## Znalostní báze
 
-Living reference documents updated per .NET release:
+Živé referenční dokumenty aktualizované s každým vydáním .NET:
 
-| Document | Purpose |
-|----------|---------|
-| [dotnet-whats-new](knowledge/dotnet-whats-new.md) | .NET 10 / C# 14 features and how to use them |
-| [common-antipatterns](knowledge/common-antipatterns.md) | Patterns Claude should never generate |
-| [package-recommendations](knowledge/package-recommendations.md) | Vetted NuGet packages with rationale and "when NOT to use" |
-| [breaking-changes](knowledge/breaking-changes.md) | .NET migration gotchas |
-| [decisions/](knowledge/decisions/) | Architecture Decision Records explaining every default |
+| Dokument | Účel |
+|----------|------|
+| [dotnet-whats-new](knowledge/dotnet-whats-new.md) | Funkce .NET 10 / C# 14 a jak je používat |
+| [common-antipatterns](knowledge/common-antipatterns.md) | Vzory, které by Claude nikdy neměl generovat |
+| [package-recommendations](knowledge/package-recommendations.md) | Prověřené NuGet balíčky s odůvodněním a „kdy NEPOUŽÍVAT" |
+| [breaking-changes](knowledge/breaking-changes.md) | Úskalí migrace .NET |
+| [decisions/](knowledge/decisions/) | Záznamy rozhodnutí o architektuře vysvětlující každý výchozí stav |
 
-## Hooks (7)
+## Hooky (7)
 
-Automated workflow integration:
+Automatizovaná integrace workflow:
 
-| Hook | Event | What It Does |
-|------|-------|-------------|
-| `pre-bash-guard.sh` | PreToolUse (Bash) | Blocks destructive git ops (force push, reset --hard), warns on risky commands |
-| `pre-commit-format.sh` | Pre-commit | `dotnet format --verify-no-changes` ensures consistent formatting |
-| `pre-commit-antipattern.sh` | Pre-commit | Detects DateTime.Now, async void, new HttpClient() in staged files |
-| `post-scaffold-restore.sh` | Post-file-edit (*.csproj) | `dotnet restore` after project file changes |
-| `post-edit-format.sh` | Post-file-edit (*.cs) | Auto-formats C# files after edits |
-| `post-test-analyze.sh` | Post-test | Parses test results and outputs actionable summary |
-| `pre-build-validate.sh` | Pre-build | Validates project structure (solution file, Directory.Build.props, test projects) |
+| Hook | Událost | Co dělá |
+|------|---------|---------|
+| `pre-bash-guard.sh` | PreToolUse (Bash) | Blokuje destruktivní git operace (force push, reset --hard), varuje u rizikových příkazů |
+| `pre-commit-format.sh` | Pre-commit | `dotnet format --verify-no-changes` zajišťuje konzistentní formátování |
+| `pre-commit-antipattern.sh` | Pre-commit | Detekuje DateTime.Now, async void, new HttpClient() ve stagovaných souborech |
+| `post-scaffold-restore.sh` | Post-file-edit (*.csproj) | `dotnet restore` po změnách projektového souboru |
+| `post-edit-format.sh` | Post-file-edit (*.cs) | Automatické formátování C# souborů po editaci |
+| `post-test-analyze.sh` | Post-test | Parsuje výsledky testů a výstupuje akční shrnutí |
+| `pre-build-validate.sh` | Pre-build | Validuje strukturu projektu (solution soubor, Directory.Build.props, testovací projekty) |
 
-## Defaults & Decisions
+## Výchozí hodnoty a rozhodnutí
 
-Every default is documented with an ADR explaining **why**:
+Každý výchozí stav je dokumentován ADR vysvětlujícím **proč**:
 
-| Decision | Default | Why |
-|----------|---------|-----|
-| Architecture | Advisor-driven | Asks questions first, then recommends VSA, CA, DDD, or Modular Monolith ([ADR-005](knowledge/decisions/005-multi-architecture.md)) |
-| Error handling | Result pattern | Exceptions are for exceptional cases ([ADR-002](knowledge/decisions/002-result-over-exceptions.md)) |
-| ORM | EF Core | Best developer experience for most scenarios ([ADR-003](knowledge/decisions/003-ef-core-default-orm.md)) |
-| Caching | HybridCache | Built-in stampede protection, L1+L2 ([ADR-004](knowledge/decisions/004-hybrid-cache-default.md)) |
-| APIs | Minimal APIs | Lighter, composable, architecture-agnostic |
-| Testing | Integration-first | `WebApplicationFactory` + `Testcontainers` over in-memory fakes |
-| Time | `TimeProvider` | Testable, injectable, no more `DateTime.Now` |
-| HTTP clients | `IHttpClientFactory` | No more `new HttpClient()` socket exhaustion |
+| Rozhodnutí | Výchozí | Proč |
+|------------|---------|------|
+| Architektura | Řízená poradcem | Nejdřív klade otázky, poté doporučí VSA, CA, DDD nebo Modular Monolith ([ADR-005](knowledge/decisions/005-multi-architecture.md)) |
+| Zpracování chyb | Result pattern | Výjimky jsou pro výjimečné případy ([ADR-002](knowledge/decisions/002-result-over-exceptions.md)) |
+| ORM | EF Core | Nejlepší vývojářská zkušenost pro většinu scénářů ([ADR-003](knowledge/decisions/003-ef-core-default-orm.md)) |
+| Cachování | HybridCache | Vestavěná ochrana proti stampede, L1+L2 ([ADR-004](knowledge/decisions/004-hybrid-cache-default.md)) |
+| API | Minimal APIs | Lehčí, kompozitní, nezávislé na architektuře |
+| Testování | Integrace na prvním místě | `WebApplicationFactory` + `Testcontainers` místo in-memory fakeů |
+| Čas | `TimeProvider` | Testovatelné, injektovatelné, konec s `DateTime.Now` |
+| HTTP klienti | `IHttpClientFactory` | Konec s `new HttpClient()` a vyčerpáním socketů |
 
-## Repository Structure
+## Struktura repozitáře
 
 ```
 dotnet-claude-kit/
-├── CLAUDE.md                    # Instructions for developing THIS repo
-├── AGENTS.md                    # Agent routing & orchestration
-├── agents/                      # 10 specialist agents
+├── CLAUDE.md                    # Instrukce pro vývoj TOHOTO repozitáře
+├── AGENTS.md                    # Směrování a orchestrace agentů
+├── agents/                      # 10 specializovaných agentů
 ├── skills/                      # 47 skills
-├── commands/                    # 15 slash commands
-├── .claude/rules/               # 10 always-loaded rules
-├── templates/                   # 5 drop-in CLAUDE.md templates
-├── knowledge/                   # Living reference documents + ADRs
-├── mcp/CWM.RoslynNavigator/     # Roslyn MCP server (15 tools)
-├── mcp-configs/                 # MCP server config templates
-├── hooks/                       # 7 Claude Code hooks
-├── docs/                        # Shorthand + longform guides
-├── .mcp.json                    # MCP server registration
-├── .claude-plugin/              # Plugin marketplace manifests
-├── .cursor/rules/               # Cursor IDE compatibility
-├── .codex/                      # Codex CLI compatibility
-└── .github/workflows/           # CI validation
+├── commands/                    # 15 slash příkazů
+├── .claude/rules/               # 10 vždy načtených pravidel
+├── templates/                   # 5 připravených CLAUDE.md šablon
+├── knowledge/                   # Živé referenční dokumenty + ADR
+├── mcp/CWM.RoslynNavigator/     # Roslyn MCP server (15 nástrojů)
+├── mcp-configs/                 # Šablony konfigurace MCP serverů
+├── hooks/                       # 7 Claude Code hooků
+├── docs/                        # Zkrácené + podrobné průvodce
+├── .mcp.json                    # Registrace MCP serveru
+├── .claude-plugin/              # Manifesty pro plugin marketplace
+├── .cursor/rules/               # Kompatibilita s Cursor IDE
+├── .codex/                      # Kompatibilita s Codex CLI
+└── .github/workflows/           # CI validace
 ```
 
-## Multi-Platform Support
+## Podpora více platforem
 
-dotnet-claude-kit works with multiple AI coding tools:
+dotnet-claude-kit funguje s více nástroji pro AI kódování:
 
-| Platform | Config File | What It Provides |
-|----------|------------|-----------------|
-| **Claude Code** | `.claude-plugin/plugin.json` | Full integration: skills, agents, commands, rules, hooks, MCP |
-| **Cursor** | `.cursor/rules/dotnet-rules.md` | Consolidated .NET rules for Cursor IDE |
-| **Codex CLI** | `.codex/AGENTS.md` | Agent configuration pointing to skills and agents |
+| Platforma | Konfigurační soubor | Co poskytuje |
+|-----------|---------------------|--------------|
+| **Claude Code** | `.claude-plugin/plugin.json` | Plná integrace: skills, agenti, příkazy, pravidla, hooky, MCP |
+| **Cursor** | `.cursor/rules/dotnet-rules.md` | Konsolidovaná .NET pravidla pro Cursor IDE |
+| **Codex CLI** | `.codex/AGENTS.md` | Konfigurace agentů odkazující na skills a agenty |
 
-## Documentation
-
-| Guide | For | Content |
-|-------|-----|---------|
-| [Shorthand Guide](docs/shorthand-guide.md) | Quick reference | All commands, skills, agents, hooks, MCP tools with cross-reference matrix |
-| [Longform Guide](docs/longform-guide.md) | Deep dive | Workflows, token optimization, autonomous patterns, troubleshooting |
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add skills, agents, commands, rules, knowledge, templates, and MCP tools.
-
-## License
-
-[MIT](LICENSE)
-
----
-
-<p align="center">
-  Built by <a href="https://codewithmukesh.com">Mukesh Murugan</a> &bull; Powered by Claude Code
-</p>

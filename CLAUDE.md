@@ -1,87 +1,87 @@
-# dotnet-claude-kit — Development Instructions
+# dotnet-claude-kit — Pokyny pro vývoj
 
-> These instructions are for developing THIS repository. For user-facing project templates, see `templates/`.
+> Tyto pokyny jsou určeny pro vývoj TOHOTO repozitáře. Uživatelské šablony projektů najdete v `templates/`.
 
-## Repository Purpose
+## Účel repozitáře
 
-dotnet-claude-kit is an opinionated Claude Code companion for .NET developers. It provides skills, agents, templates, knowledge documents, and a Roslyn MCP server that make Claude Code dramatically more effective for .NET development.
+dotnet-claude-kit je názorový společník Claude Code pro .NET vývojáře. Poskytuje skills, agents, šablony, znalostní dokumenty a Roslyn MCP server, které výrazně zvyšují efektivitu Claude Code při vývoji v .NET.
 
-## Philosophy
+## Filosofie
 
-- **Guided over prescriptive** — We ask the right questions, then recommend the best approach with clear rationale
-- **Modern .NET only** — Target .NET 10 and C# 14. No legacy patterns, no backwards compatibility with .NET Framework
-- **Architecture-aware** — We support VSA, Clean Architecture, DDD, and Modular Monolith with an advisor skill that recommends the best fit (see ADR-005)
-- **Token-conscious** — Every file respects context window limits. Skills max at 400 lines
-- **Practical over theoretical** — Every recommendation includes a code example and a "why"
+- **Vedení místo předepisování** — Položíme správné otázky a poté doporučíme nejlepší přístup s jasným zdůvodněním
+- **Pouze moderní .NET** — Cílíme na .NET 10 a C# 14. Žádné zastaralé vzory, žádná zpětná kompatibilita s .NET Framework
+- **S ohledem na architekturu** — Podporujeme VSA, Clean Architecture, DDD a Modular Monolith s poradním skillem, který doporučí nejlepší volbu (viz ADR-005)
+- **S ohledem na tokeny** — Každý soubor respektuje limity kontextového okna. Skills mají maximálně 400 řádků
+- **Praktičnost nad teorií** — Každé doporučení obsahuje příklad kódu a zdůvodnění „proč"
 
-## Skill Structure
+## Struktura skills
 
-Skills follow the Agent Skills open standard. Each skill lives at `skills/<skill-name>/SKILL.md`.
+Skills se řídí otevřeným standardem Agent Skills. Každý skill se nachází v `skills/<skill-name>/SKILL.md`.
 
-### Frontmatter Schema (Required)
+### Schéma frontmatteru (povinné)
 
 ```yaml
 ---
-name: skill-name           # kebab-case, matches directory name
+name: skill-name           # kebab-case, odpovídá názvu adresáře
 description: >
   What this skill does and when Claude should load it.
   Include trigger keywords and specific scenarios.
 ---
 ```
 
-### Required Sections
+### Povinné sekce
 
-1. **Core Principles** — 3-5 numbered, opinionated defaults with rationale
-2. **Patterns** — Code examples with explanation. Each pattern has:
-   - A descriptive heading
-   - Working C# code (must compile conceptually)
-   - Brief explanation of why this is the recommended approach
-3. **Anti-patterns** — What NOT to do, with BAD/GOOD code comparison
-4. **Decision Guide** — Markdown table: Scenario → Recommendation
+1. **Core Principles** — 3–5 očíslovaných názorových výchozích nastavení se zdůvodněním
+2. **Patterns** — Příklady kódu s vysvětlením. Každý vzor obsahuje:
+   - Popisný nadpis
+   - Funkční C# kód (musí být konceptuálně kompilovatelný)
+   - Stručné vysvětlení, proč je toto doporučený přístup
+3. **Anti-patterns** — Co NEDĚLAT, s porovnáním BAD/GOOD kódu
+4. **Decision Guide** — Markdown tabulka: Scénář → Doporučení
 
-### Quality Standards
+### Kvalitativní standardy
 
-- **Maximum 400 lines** — Every line must earn its place. Respect token budgets.
-- **Every recommendation has a "why"** — No bare rules without justification
-- **Code examples must be modern C#** — Primary constructors, collection expressions, file-scoped namespaces, records
-- **No Swashbuckle** — Use built-in .NET OpenAPI support
-- **No repository pattern over EF Core** — Use DbContext directly
-- **`TimeProvider` over `DateTime.Now`** — Always
+- **Maximálně 400 řádků** — Každý řádek si musí zasloužit své místo. Respektujte rozpočty tokenů.
+- **Každé doporučení má své „proč"** — Žádná holá pravidla bez zdůvodnění
+- **Příklady kódu musí být v moderním C#** — Primary constructors, collection expressions, file-scoped namespaces, records
+- **Žádný Swashbuckle** — Použijte vestavěnou podporu .NET OpenAPI
+- **Žádný repository pattern nad EF Core** — Používejte DbContext přímo
+- **`TimeProvider` místo `DateTime.Now`** — Vždy
 
-## Agent Structure
+## Struktura agents
 
-Agents live at `agents/<agent-name>.md`. Each agent contains:
+Agents se nacházejí v `agents/<agent-name>.md`. Každý agent obsahuje:
 
-1. **Role definition** — What this agent is an expert in
-2. **Skill dependencies** — Which skills this agent loads (by name)
-3. **MCP tool usage** — When to use cwm-roslyn-navigator tools vs reading files
-4. **Response patterns** — How to structure guidance
-5. **Boundaries** — What this agent does NOT handle
+1. **Definice role** — V čem je tento agent expertem
+2. **Závislosti na skills** — Které skills tento agent načítá (podle názvu)
+3. **Použití MCP nástrojů** — Kdy použít nástroje cwm-roslyn-navigator vs. čtení souborů
+4. **Vzory odpovědí** — Jak strukturovat vedení
+5. **Hranice** — Co tento agent NEŘEŠÍ
 
-## Template Structure
+## Struktura šablon
 
-Templates live at `templates/<template-name>/`. Each contains:
+Šablony se nacházejí v `templates/<template-name>/`. Každá obsahuje:
 
-- `CLAUDE.md` — Drop-in file for user projects
-- `README.md` — When and how to use this template
+- `CLAUDE.md` — Soubor připravený k vložení do uživatelských projektů
+- `README.md` — Kdy a jak tuto šablonu použít
 
-Templates reference skills by name and should be self-contained — a user copies just the CLAUDE.md into their project.
+Šablony odkazují na skills podle názvu a měly by být samostatné — uživatel zkopíruje pouze CLAUDE.md do svého projektu.
 
-## Knowledge Documents
+## Znalostní dokumenty
 
-Knowledge files at `knowledge/` are NOT skills. They're reference material that agents and templates point to. They don't follow the skill frontmatter format.
+Znalostní soubory v `knowledge/` NEJSOU skills. Jsou to referenční materiály, na které odkazují agents a šablony. Neřídí se formátem frontmatteru pro skills.
 
-- `dotnet-whats-new.md` — Updated per .NET release
-- `common-antipatterns.md` — Patterns Claude should never generate
-- `package-recommendations.md` — Vetted NuGet packages
-- `breaking-changes.md` — Migration gotchas
-- `decisions/*.md` — ADRs using the template format
+- `dotnet-whats-new.md` — Aktualizováno s každým vydáním .NET
+- `common-antipatterns.md` — Vzory, které by Claude neměl nikdy generovat
+- `package-recommendations.md` — Prověřené NuGet balíčky
+- `breaking-changes.md` — Úskalí při migraci
+- `decisions/*.md` — ADR podle formátu šablony
 
-## Command Structure
+## Struktura commands
 
-Commands live at `commands/<command-name>.md`. Each command is a lightweight orchestrator that invokes skills and agents.
+Commands se nacházejí v `commands/<command-name>.md`. Každý command je lehký orchestrátor, který vyvolává skills a agents.
 
-### Frontmatter Schema (Required)
+### Schéma frontmatteru (povinné)
 
 ```yaml
 ---
@@ -90,25 +90,25 @@ description: >
 ---
 ```
 
-### Required Sections
+### Povinné sekce
 
-1. **What** — What the command does
-2. **When** — When to use it (trigger phrases)
-3. **How** — Step-by-step execution flow (invokes skills/agents)
-4. **Example** — Example output or usage
-5. **Related** — Related commands
+1. **What** — Co command dělá
+2. **When** — Kdy ho použít (spouštěcí fráze)
+3. **How** — Krok za krokem postup vykonávání (vyvolává skills/agents)
+4. **Example** — Příklad výstupu nebo použití
+5. **Related** — Související commands
 
-### Quality Standards
+### Kvalitativní standardy
 
-- **Maximum 200 lines** — Commands are orchestrators, not encyclopedias
-- **Invoke, don't implement** — Commands reference skills and agents for the actual logic
-- **Clear trigger phrases** — Users should know when to reach for this command
+- **Maximálně 200 řádků** — Commands jsou orchestrátory, ne encyklopedie
+- **Vyvolávejte, neimplementujte** — Commands odkazují na skills a agents pro vlastní logiku
+- **Jasné spouštěcí fráze** — Uživatelé by měli vědět, kdy po tomto commandu sáhnout
 
-## Rule Structure
+## Struktura pravidel
 
-Rules live at `rules/dotnet/<rule-name>.md`. Rules are always loaded into context.
+Pravidla se nacházejí v `rules/dotnet/<rule-name>.md`. Pravidla jsou vždy načtena do kontextu.
 
-### Frontmatter Schema (Required)
+### Schéma frontmatteru (povinné)
 
 ```yaml
 ---
@@ -118,84 +118,84 @@ description: >
 ---
 ```
 
-### Quality Standards
+### Kvalitativní standardy
 
-- **Maximum 100 lines** — Rules are always in context, so every line costs tokens
-- **Prescriptive with rationale** — Each rule has a brief "why"
-- **DO/DON'T format** — Clear, scannable rules
-- **Total rules budget: ~600 lines** — All rules combined must stay lean
+- **Maximálně 100 řádků** — Pravidla jsou vždy v kontextu, takže každý řádek stojí tokeny
+- **Předepisující se zdůvodněním** — Každé pravidlo má stručné „proč"
+- **Formát DO/DON'T** — Jasná, snadno čitelná pravidla
+- **Celkový rozpočet pravidel: ~600 řádků** — Všechna pravidla dohromady musí zůstat úsporná
 
 ## Roslyn MCP Server
 
-The MCP server lives at `mcp/CWM.RoslynNavigator/`. It's a .NET 10 application using the ModelContextProtocol SDK.
+MCP server se nachází v `mcp/CWM.RoslynNavigator/`. Je to aplikace v .NET 10 využívající ModelContextProtocol SDK.
 
-### Building
+### Sestavení
 
 ```bash
 dotnet build mcp/CWM.RoslynNavigator/CWM.RoslynNavigator.slnx
 dotnet test mcp/CWM.RoslynNavigator/CWM.RoslynNavigator.slnx
 ```
 
-### Key Rules
+### Klíčová pravidla
 
-- Tools are **read-only** — No code generation, no modifications
-- Responses are **token-optimized** — Return file paths, line numbers, and short snippets, never full file contents
-- The workspace must handle **graceful loading** — Return "loading" status instead of errors during initialization
+- Nástroje jsou **pouze pro čtení** — Žádné generování kódu, žádné úpravy
+- Odpovědi jsou **optimalizované na tokeny** — Vracejte cesty k souborům, čísla řádků a krátké úryvky, nikdy celé obsahy souborů
+- Workspace musí zvládat **postupné načítání** — Při inicializaci vracejte stav „loading" místo chyb
 
-## Workflow Standards
+## Standardy pracovního postupu
 
-How Claude should work on this repository (and any project using dotnet-claude-kit templates).
+Jak by měl Claude pracovat na tomto repozitáři (a na jakémkoli projektu používajícím šablony dotnet-claude-kit).
 
-### Plan Before Building
+### Plánujte před stavbou
 
-- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
-- Iterate on the plan until it's solid before writing code
-- If something goes sideways mid-implementation, STOP and re-plan — don't keep pushing through a broken approach
-- Write detailed specs upfront to reduce ambiguity — vague plans produce vague code
+- Vstupte do režimu plánování pro JAKÝKOLI netriviální úkol (3+ kroky nebo architektonická rozhodnutí)
+- Iterujte na plánu, dokud není solidní, než začnete psát kód
+- Pokud se něco v průběhu implementace pokazí, ZASTAVTE SE a přeplánujte — nepokračujte v nefunkčním přístupu
+- Pište podrobné specifikace předem, aby se snížila nejednoznačnost — vágní plány produkují vágní kód
 
-### Verify Before Done
+### Ověřte před dokončením
 
-- Never mark a task complete without proving it works
-- Run `dotnet build` and `dotnet test` after changes — green builds are the minimum bar
-- Use `get_diagnostics` via the Roslyn MCP to catch warnings after modifications
-- Ask yourself: "Would a staff .NET engineer approve this?" — if not, iterate
-- Diff behavior between main and your changes when relevant
+- Nikdy neoznačujte úkol jako dokončený bez důkazu, že funguje
+- Po změnách spusťte `dotnet build` a `dotnet test` — zelený build je minimální laťka
+- Použijte `get_diagnostics` přes Roslyn MCP k zachycení varování po úpravách
+- Zeptejte se sami sebe: „Schválil by to senior .NET inženýr?" — pokud ne, iterujte
+- Když je to relevantní, porovnejte chování mezi main a vašimi změnami
 
-### Fix Bugs Autonomously
+### Opravujte chyby autonomně
 
-- When given a bug report: investigate and fix it. Don't ask for hand-holding
-- Point at logs, errors, failing tests — then resolve them
-- Go fix failing CI tests without being told how
-- Zero context switching required from the user
+- Při obdržení hlášení o chybě: prozkoumejte a opravte ji. Nežádejte o vedení za ruku
+- Ukažte na logy, chyby, padající testy — a pak je vyřešte
+- Opravte padající CI testy bez toho, abyste čekali na pokyny
+- Nulový context switching vyžadovaný od uživatele
 
-### Demand Elegance (Balanced)
+### Vyžadujte eleganci (s mírou)
 
-- For non-trivial changes: pause and ask "is there a more elegant way?"
-- If a fix feels hacky, step back: "Knowing everything I know now, implement the elegant solution"
-- Skip this for simple, obvious fixes — don't over-engineer. Three lines of clear code beats a premature abstraction
-- Challenge your own work before presenting it
+- U netriviálních změn: zastavte se a zeptejte se „existuje elegantnější způsob?"
+- Pokud oprava působí jako hack, ustupte: „Se vším, co nyní vím, implementuji elegantní řešení"
+- U jednoduchých, zřejmých oprav toto přeskočte — nepřeinženýrujte. Tři řádky jasného kódu porazí předčasnou abstrakci
+- Zpochybněte vlastní práci, než ji prezentujete
 
-### Use Subagents for Parallel Work
+### Používejte subagents pro paralelní práci
 
-- Use subagents liberally to keep the main context window clean
-- Offload research, exploration, and parallel analysis to subagents
-- One task per subagent for focused execution
-- For complex problems, throw more compute at it via subagents rather than doing sequential work
+- Používejte subagents hojně, aby hlavní kontextové okno zůstalo čisté
+- Přeneste výzkum, průzkum a paralelní analýzu na subagents
+- Jeden úkol na jednoho subagenta pro soustředěné vykonávání
+- U složitých problémů nasaďte více výpočetního výkonu přes subagents místo sekvenční práce
 
-### Learn from Corrections
+### Učte se z oprav
 
-- After ANY correction from the user, capture the pattern in auto memory (`MEMORY.md`)
-- Write rules that prevent the same mistake from recurring
-- Review memory at session start for project-relevant lessons
-- This is a compounding system — mistake rate should drop over time
+- Po JAKÉKOLI opravě od uživatele zachyťte vzor do automatické paměti (`MEMORY.md`)
+- Pište pravidla, která zabrání opakování stejné chyby
+- Na začátku relace si projděte paměť pro poučení relevantní k projektu
+- Toto je systém s kumulativním efektem — míra chyb by měla postupně klesat
 
-## Contribution Workflow
+## Pracovní postup pro přispívání
 
-1. Check the spec at `docs/dotnet-claude-kit-SPEC.md` for the full vision
-2. Follow the skill/agent/template/command/rule structure defined above
-3. Run `dotnet format --verify-no-changes` before committing
-4. Ensure skill files stay under 400 lines, commands under 200, rules under 100
-5. Every new pattern needs a BAD/GOOD code comparison in Anti-patterns
-6. Ensure all cross-references (commands → skills, agents → skills) resolve to real files
-7. New commands must have YAML frontmatter with `description`
-8. New rules must have `alwaysApply: true` in frontmatter
+1. Zkontrolujte specifikaci v `docs/dotnet-claude-kit-SPEC.md` pro celkovou vizi
+2. Dodržujte strukturu skill/agent/template/command/rule definovanou výše
+3. Před commitem spusťte `dotnet format --verify-no-changes`
+4. Ujistěte se, že soubory skills mají pod 400 řádků, commands pod 200, pravidla pod 100
+5. Každý nový vzor potřebuje porovnání BAD/GOOD kódu v Anti-patterns
+6. Ujistěte se, že všechny křížové odkazy (commands → skills, agents → skills) vedou na existující soubory
+7. Nové commands musí mít YAML frontmatter s `description`
+8. Nová pravidla musí mít `alwaysApply: true` ve frontmatteru
