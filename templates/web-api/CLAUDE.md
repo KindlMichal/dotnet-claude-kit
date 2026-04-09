@@ -45,6 +45,16 @@ src/
   [ProjectName].Api/            # Endpoints, middleware (references all)
 ```
 
+**Solution Folders** — organize .slnx with numbered folders to reflect dependency direction:
+
+| Solution Folder      | Projects                          |
+|----------------------|-----------------------------------|
+| `1. Core`            | `[ProjectName].Domain`            |
+| `2. Application`     | `[ProjectName].Application`       |
+| `3. Infrastructure`  | `[ProjectName].Infrastructure`    |
+| `4. API`             | `[ProjectName].Api`               |
+| `5. UI`              | *(only if project includes a UI)* |
+
 ### Option C: DDD + Clean Architecture (best for complex domains)
 
 ```
@@ -54,6 +64,16 @@ src/
   [ProjectName].Infrastructure/ # Persistence, external service adapters
   [ProjectName].Api/            # Thin endpoints
 ```
+
+**Solution Folders** — organize .slnx with numbered folders to reflect dependency direction:
+
+| Solution Folder      | Projects                          |
+|----------------------|-----------------------------------|
+| `1. Core`            | `[ProjectName].Domain`            |
+| `2. Application`     | `[ProjectName].Application`       |
+| `3. Infrastructure`  | `[ProjectName].Infrastructure`    |
+| `4. API`             | `[ProjectName].Api`               |
+| `5. UI`              | *(only if project includes a UI)* |
 
 ### Tests
 
