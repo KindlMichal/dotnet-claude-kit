@@ -1,44 +1,50 @@
 ---
 name: k2-open-api
 description: >
-  OpenAPI 2.0 (Swagger) configuration for Nintex K2 integration. K2 requires
-  Swagger 2.0 spec format with Swashbuckle, AdditionalProperties enabled on all
-  schemas, and dynamic server URL resolution. Load this skill when building APIs
-  consumed by Nintex K2, or when the user mentions "K2", "Nintex K2", "Swagger 2.0",
-  "OpenAPI 2.0", "K2 connector", "K2 SmartObject", or "K2 integration".
+  Dual OpenAPI setup for Nintex K2 integration: modern OpenAPI 3.x with Scalar UI
+  as the primary documentation, plus a legacy Swagger 2.0 endpoint for K2 compatibility.
+  Uses built-in .NET OpenAPI for 3.x and Swashbuckle solely for the 2.0 spec.
+  Load this skill when building APIs consumed by Nintex K2, or when the user mentions
+  "K2", "Nintex K2", "Swagger 2.0", "OpenAPI 2.0", "K2 connector", "K2 SmartObject",
+  or "K2 integration".
 ---
 
 # Nintex K2 OpenAPI
 
 ## Core Principles
 
-1. **OpenAPI 2.0 is mandatory** — K2 does not support OpenAPI 3.x. You must configure Swashbuckle to emit the Swagger 2.0 spec explicitly via `OpenApiSpecVersion.OpenApi2_0`. The built-in .NET OpenAPI (`Microsoft.AspNetCore.OpenApi`) only generates 3.x and cannot be used.
-2. **AdditionalProperties must be allowed** — K2 fails to parse schemas where `additionalProperties` is not set. A document filter must explicitly set `AdditionalPropertiesAllowed = true` on every schema that lacks an `AdditionalProperties` definition.
-3. **Dynamic server URL** — K2 reads the server URL from the spec. Use a `PreSerializeFilter` to set it from the incoming request so the spec works across environments (localhost, staging, production) without manual edits.
-4. **Swashbuckle is required here** — Unlike standard .NET 10 projects where Swashbuckle is deprecated, K2 integration requires it because the built-in OpenAPI package does not support the 2.0 spec format.
+1. **Dual-spec architecture** — Serve OpenAPI 3.x as the primary spec (with Scalar UI) and Swagger 2.0 as a legacy endpoint for K2. Modern clients and developers use `/openapi3/v1.json` + Scalar, K2 consumes `/openapi2/v1.json`. Both specs are generated from the same codebase.
+2. **Built-in OpenAPI is primary, Swashbuckle is secondary** — .NET 9+ removed Swashbuckle from templates. Use `AddOpenApi()` + `MapOpenApi()` for the modern spec. Swashbuckle (`AddSwaggerGen`) is added solely to produce the OpenAPI 2.0 output that K2 requires.
+3. **AdditionalProperties must be allowed** — K2 fails to parse schemas where `additionalProperties` is not set. A document filter must explicitly set `AdditionalPropertiesAllowed = true` on every schema that lacks an `AdditionalProperties` definition.
+4. **Dynamic server URL for K2** — K2 reads the server URL from the spec. Use a `PreSerializeFilter` to resolve it from the incoming request so the spec works across environments without manual edits.
 
 ## Patterns
 
-### Required NuGet Package
+### Required NuGet Packages
 
 ```bash
 dotnet add package Swashbuckle.AspNetCore
+dotnet add package Scalar.AspNetCore
 ```
 
-### SwaggerGen Registration with Document Filter
+`Swashbuckle.AspNetCore` is needed only for the legacy OpenAPI 2.0 endpoint. `Scalar.AspNetCore` provides the modern API documentation UI.
 
-Register `SwaggerGen` with the `AdditionalParametersDocumentFilter` to ensure all schemas are K2-compatible.
+### Service Registration (Dual Spec)
+
+Register both the built-in OpenAPI and Swashbuckle side by side. Each serves a different audience.
 
 ```csharp
+// OpenAPI 3.x — primary spec for modern clients and Scalar UI
+builder.Services.AddOpenApi("v1");
+
+// Swagger 2.0 — legacy spec for Nintex K2
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "My K2 API",
-        Version = "v1",
-        Description = "API consumed by Nintex K2 SmartObjects"
+        Title = "My API | v1",
+        Version = "1.0.0"
     });
-
     c.DocumentFilter<AdditionalParametersDocumentFilter>();
 });
 ```
@@ -63,21 +69,32 @@ public sealed class AdditionalParametersDocumentFilter : IDocumentFilter
 }
 ```
 
-### Swagger Middleware with OpenAPI 2.0 and Dynamic Server URL
+### Middleware Configuration (Dual Endpoints)
 
-Configure the Swagger middleware to output OpenAPI 2.0 and resolve the server URL dynamically from the incoming request.
+Separate route templates keep the two specs at distinct, predictable URLs.
 
 ```csharp
+// OpenAPI 3.x at /openapi3/v1.json
+app.MapOpenApi("/openapi3/{documentName}.json");
+
+// Scalar UI — points to the OpenAPI 3.x spec
+app.MapScalarApiReference(options =>
+{
+    options.OpenApiRoutePattern = "/openapi3/{documentName}.json";
+});
+
+// Swagger 2.0 at /openapi2/v1.json — for K2 only
 app.UseSwagger(c =>
 {
     c.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+    c.RouteTemplate = "openapi2/{documentName}.json";
     c.PreSerializeFilters.Add((swagger, httpReq) =>
     {
         swagger.Servers =
         [
             new OpenApiServer
             {
-                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{httpReq.PathBase}"
+                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}"
             }
         ];
     });
@@ -89,42 +106,59 @@ app.UseSwagger(c =>
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
+// OpenAPI 3.x
+builder.Services.AddOpenApi("v1");
+
+// Swagger 2.0 for K2
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "My K2 API",
-        Version = "v1"
+        Title = "My API | v1",
+        Version = "1.0.0"
     });
     c.DocumentFilter<AdditionalParametersDocumentFilter>();
 });
 
 var app = builder.Build();
 
+// OpenAPI 3.x endpoint
+app.MapOpenApi("/openapi3/{documentName}.json");
+
+// Scalar UI for developers
+app.MapScalarApiReference(options =>
+{
+    options.OpenApiRoutePattern = "/openapi3/{documentName}.json";
+});
+
+// Swagger 2.0 endpoint for K2
 app.UseSwagger(c =>
 {
     c.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+    c.RouteTemplate = "openapi2/{documentName}.json";
     c.PreSerializeFilters.Add((swagger, httpReq) =>
     {
         swagger.Servers =
         [
             new OpenApiServer
             {
-                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{httpReq.PathBase}"
+                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}"
             }
         ];
     });
 });
 
-// Optional: Swagger UI for development testing
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwaggerUI();
-}
-
 app.MapEndpoints();
 app.Run();
 ```
+
+### URL Summary
+
+| URL | Format | Consumer |
+|---|---|---|
+| `/openapi3/v1.json` | OpenAPI 3.x | Scalar UI, modern clients, code generators |
+| `/scalar/v1` | Scalar UI | Developers browsing API docs |
+| `/openapi2/v1.json` | Swagger 2.0 | Nintex K2 service instance registration |
 
 ### Endpoint Design for K2 SmartObjects
 
@@ -182,21 +216,41 @@ public sealed record OrderDto(
 
 ## Anti-patterns
 
-### Using Built-in .NET OpenAPI for K2
+### Using Only Swashbuckle for Everything
+
+```csharp
+// BAD — Swashbuckle is deprecated in .NET 9+, don't use it as your primary spec
+builder.Services.AddSwaggerGen();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// GOOD — built-in OpenAPI + Scalar as primary, Swashbuckle only for K2 legacy endpoint
+builder.Services.AddOpenApi("v1");
+builder.Services.AddSwaggerGen(c =>
+{
+    c.DocumentFilter<AdditionalParametersDocumentFilter>();
+});
+app.MapOpenApi("/openapi3/{documentName}.json");
+app.MapScalarApiReference();
+app.UseSwagger(c =>
+{
+    c.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+    c.RouteTemplate = "openapi2/{documentName}.json";
+});
+```
+
+### Using Only Built-in OpenAPI (No K2 Support)
 
 ```csharp
 // BAD — built-in OpenAPI only generates 3.x, K2 cannot parse it
 builder.Services.AddOpenApi();
 app.MapOpenApi();
 
-// GOOD — Swashbuckle with explicit 2.0 version
+// GOOD — add Swashbuckle alongside for the 2.0 endpoint
+builder.Services.AddOpenApi("v1");
 builder.Services.AddSwaggerGen(c =>
 {
     c.DocumentFilter<AdditionalParametersDocumentFilter>();
-});
-app.UseSwagger(c =>
-{
-    c.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
 });
 ```
 
@@ -213,20 +267,22 @@ builder.Services.AddSwaggerGen(c =>
 });
 ```
 
-### Hardcoded Server URL
+### Same Route for Both Specs
 
 ```csharp
-// BAD — breaks when deployed to a different environment
-swagger.Servers = [new OpenApiServer { Url = "https://localhost:5001" }];
+// BAD — route collision between OpenAPI 3.x and 2.0
+app.MapOpenApi("/openapi/{documentName}.json");
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "openapi/{documentName}.json";
+});
 
-// GOOD — resolved dynamically from the request
-swagger.Servers =
-[
-    new OpenApiServer
-    {
-        Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{httpReq.PathBase}"
-    }
-];
+// GOOD — separate routes make the purpose of each endpoint clear
+app.MapOpenApi("/openapi3/{documentName}.json");
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "openapi2/{documentName}.json";
+});
 ```
 
 ### Complex Nested DTOs
@@ -252,17 +308,18 @@ public sealed record OrderDto(
 
 | Scenario | Recommendation |
 |---|---|
-| New API for K2 consumption | Use this skill — Swashbuckle + OpenAPI 2.0 |
-| API consumed by both K2 and modern clients | Serve Swagger 2.0 for K2, consider a separate OpenAPI 3.x doc for others |
-| API not consumed by K2 | Use the `openapi` skill with built-in .NET OpenAPI instead |
+| New API consumed by K2 | Use this skill — dual spec with OpenAPI 3.x + Swagger 2.0 |
+| API not consumed by K2 | Use the `openapi` + `scalar` skills instead — no Swashbuckle needed |
+| K2 SmartObject registration fails | Check: `/openapi2/v1.json` returns 2.0 spec, `AdditionalPropertiesAllowed` is set, DTOs are flat |
 | Complex domain models | Flatten into K2-friendly DTOs at the API boundary |
-| Multiple environments | Use `PreSerializeFilters` for dynamic server URL — never hardcode |
-| K2 SmartObject registration fails | Check: OpenAPI version is 2.0, `AdditionalPropertiesAllowed` is set, DTOs are flat |
+| Multiple environments | `PreSerializeFilters` resolves the server URL dynamically — never hardcode |
+| Removing K2 support later | Delete `AddSwaggerGen`, `UseSwagger`, the document filter, and the Swashbuckle package — the OpenAPI 3.x + Scalar setup remains untouched |
 
 ## Required Usings
 
 ```csharp
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
 ```
